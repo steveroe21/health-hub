@@ -3,6 +3,15 @@ from PIL import Image, ImageDraw
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 src = open(f'{ROOT}/src/app.html').read()
+# exercise library: src/exercises.txt -> compact JSON array injected into the page
+lib = []
+for line in open(f'{ROOT}/src/exercises.txt'):
+    line = line.strip()
+    if not line or line.startswith('#'): continue
+    n, e, m, sec, t = [x.strip() for x in line.split('|')]
+    lib.append([n, e, m, sec, t])
+assert '/*%%EXERCISES%%*/[]' in src
+src = src.replace('/*%%EXERCISES%%*/[]', json.dumps(lib, separators=(',', ':')))
 dist = f'{ROOT}/dist'
 shutil.rmtree(dist, ignore_errors=True)
 os.makedirs(f'{dist}/artifact'); os.makedirs(f'{dist}/HealthHub/icons')
@@ -27,7 +36,7 @@ manifest = {
 open(f'{dist}/HealthHub/manifest.webmanifest', 'w').write(json.dumps(manifest, indent=2))
 
 sw = """// Health Hub service worker: network first, cache fallback (works offline, picks up updates when online)
-const CACHE = 'healthhub-v3';
+const CACHE = 'healthhub-v4';
 const ASSETS = ['./', './index.html', './config.js', './vendor/supabase.js', './manifest.webmanifest', './icons/apple-touch-icon.png', './icons/icon-192.png', './icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });

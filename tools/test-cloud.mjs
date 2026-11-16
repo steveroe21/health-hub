@@ -39,7 +39,7 @@ console.log('mode:', await page.evaluate(() => window.__hh.Store.mode), '| sync:
 // add a weigh-in and a manual lift on 12 Nov, then goal
 await page.click('[data-act="add"][data-kind="weight"]');
 await page.fill('.sheet input[name=kg]', '88.2'); await page.click('.sheet button[type=submit]'); await page.waitForTimeout(500);
-await page.click('[data-act="add"][data-kind="lift"]');
+await page.click('[data-act="add"][data-kind="lift"]'); await page.click('.sheet [data-past]'); await page.waitForTimeout(400);
 await page.fill('.sheet input[name=date]', '2026-11-12'); await page.fill('.sheet input[name=volume]', '9000'); await page.click('.sheet button[type=submit]'); await page.waitForTimeout(500);
 const docs = await page.evaluate(() => JSON.parse(sessionStorage.getItem('mockdb')));
 console.log('docs:', Object.keys(docs), JSON.stringify(docs['data/users/u123/weights-2026']));

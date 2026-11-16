@@ -36,6 +36,7 @@ function seed() {
 }
 const seeded = seed();
 
+await ctx.route('**/config.js', r => r.fulfill({ contentType: 'text/javascript', body: 'window.HH_CONFIG = {};' }));  // on-device mode
 const page = await ctx.newPage();
 page.on('pageerror', e => errors.push('pageerror: ' + e.message));
 page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
@@ -80,7 +81,7 @@ await page.screenshot({ path: `${shots}/sheet-goal.png` });
 await page.click('.sheet [data-close]'); await page.waitForTimeout(300);
 
 // lifting log
-await page.click('[data-act="add"][data-kind="lift"]');
+await page.click('[data-act="add"][data-kind="liftpast"]');
 await page.waitForSelector('.sheet.open');
 await page.click('.sheet [data-chip="Pull"]');
 await page.fill('.sheet input[name=volume]', '8,450');
