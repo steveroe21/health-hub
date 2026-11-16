@@ -1,0 +1,4 @@
+dist/
+shots/
+tools/node_modules/
+.DS_Store
