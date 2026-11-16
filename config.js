@@ -2,6 +2,6 @@
 // row-level security rules are what keep each person's data private.
 // Never put the "service_role" / secret key here.
 window.HH_CONFIG = {
-  supabaseUrl: '',   // e.g. https://abcdefgh.supabase.co
-  supabaseKey: ''    // the publishable (anon) key
+  supabaseUrl: 'https://tldbofbnqdloddgivktk.supabase.co',
+  supabaseKey: 'sb_publishable_ojGgf3pyV1xCYTnNcIOJLA_KVrZZjdS'
 };
