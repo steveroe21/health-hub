@@ -10,6 +10,7 @@ A personal health and weight-loss tracker that installs on iPhone as a home-scre
 - **Lifting**: a full workout logger. Start an empty workout or a routine, add exercises from a built-in library of ~390 (or your own), and log every set: previous numbers, set types (warm-up, drop, failure), rest timer, PR detection. Workouts can be edited, saved as routines, and feed the weekly volume chart. Hevy CSV imports keep every set too.
 - **Running**: log distance and time (pace is worked out for you). You see weekly distance totals.
 - **Steps**: one total per day. You see weekly totals and the daily average you need for the rest of the week.
+- **Weekly check-ins**: every Sunday the Today screen shows a check-in section. Log a weight, a summary of the week and up to 5 progress photos, all optional. The weight is added to your weigh-ins; past check-ins and their photos are on the Weight tab. Photos are shrunk on the phone before upload and stored privately (a Supabase storage bucket where each person can only reach their own folder).
 - **Goals**: each weekly metric gets a target by a date. The target ramps in a straight line from where you start to the goal, so every week shows the level to hit (✓ marks weeks you hit it).
 
 ## Install on iPhone
@@ -34,7 +35,7 @@ Both fonts are bundled in `fonts/` under the SIL Open Font License. App icons ar
 | `src/exercises.txt` | Exercise library: `Name (Equipment) | Equipment | Primary muscle | Secondary | Type` |
 | `tools/build.py` | Builds the site files at the repo root, the Claude-hosted version and an install zip |
 | `index.html`, `manifest.webmanifest`, `sw.js`, `icons/` | Built site files that GitHub Pages serves (don't edit by hand) |
-| `tools/test*.mjs` | Headless-browser tests (app, Claude storage, accounts, Supabase library, workout logger) |
+| `tools/test*.mjs` | Headless-browser tests (app, Claude storage, accounts, Supabase library, workout logger, weekly check-ins) |
 
 ## Develop
 

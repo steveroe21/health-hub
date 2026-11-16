@@ -309,6 +309,49 @@ body.has-resume #scroll{padding-bottom:84px}
 .rest-grid .btn.on{background:var(--accent);color:#fff}
 textarea.plain{font-family:var(--font);font-size:16px;min-height:72px}
 .pr{color:var(--warn-ink);font-weight:650}
+/* ---------- weekly check-in ---------- */
+.ellip{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ci-cta{display:flex!important;align-items:center;gap:14px}
+.ci-ic{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--link);display:flex;align-items:center;justify-content:center;flex:none}
+.ci-ic svg{width:24px;height:24px}
+.ci-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.ci-t .t{font-family:var(--display);font-stretch:118%;font-weight:800;font-size:18px;letter-spacing:-.02em;line-height:1.2}
+.ci-t .s{font-size:13.5px;color:var(--text-2);line-height:1.4}
+.ci-cta .arr{color:var(--link)}
+.ph{position:relative;display:block;overflow:hidden;border-radius:10px;background:var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237A8CA3' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='16' rx='2'/%3E%3Ccircle cx='9' cy='10' r='2'/%3E%3Cpath d='M21 16l-5-5-9 9'/%3E%3C/svg%3E") center/22px no-repeat}
+.ph img{display:block;width:100%;height:100%;object-fit:cover}
+.ph img.broken{visibility:hidden}
+.ci-thumbs{display:flex;gap:6px;margin-top:12px}
+.ci-thumbs .ph{width:52px;height:52px;flex:none;border-radius:9px}
+.list .item.ci-item{display:block}
+.ci-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.ci-item .ci-thumbs{margin-top:10px}
+.ci-sum{white-space:pre-wrap;color:var(--text)!important;font-size:15.5px!important;line-height:1.5!important;margin-top:8px!important;overflow-wrap:anywhere}
+.ci-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.ci-grid .ph{aspect-ratio:3/4;width:100%;border:0;padding:0}
+.ci-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ci-tile{position:relative;aspect-ratio:3/4}
+.ci-tile .ph{position:absolute;inset:0}
+.ci-x{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(6,18,34,.8);color:#fff;font-size:19px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0 0 2px}
+.ci-spin{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(6,18,34,.45);border-radius:10px}
+.ci-spin .spin{width:24px;height:24px}
+.ci-add{position:relative;aspect-ratio:3/4;border:1.5px dashed var(--surface-3);border-radius:10px;color:var(--text-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:13.5px;font-weight:650;cursor:pointer;text-align:center;padding:6px}
+.ci-add svg{width:26px;height:26px;color:var(--link);margin-bottom:2px}
+.ci-add small{color:var(--muted);font-weight:600;font-size:12px}
+.ci-add.off{opacity:.4;pointer-events:none}
+.ci-add:active{background:var(--surface-2)}
+.pv{position:fixed;inset:0;z-index:80;background:#000;display:flex;flex-direction:column;opacity:0;transition:opacity .18s;touch-action:pan-y}
+.pv.open{opacity:1}
+.pv-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:calc(env(safe-area-inset-top) + 8px) max(12px, env(safe-area-inset-right)) 8px max(18px, env(safe-area-inset-left));color:var(--text-2);font-size:14px;font-weight:650;min-height:56px;flex:none}
+.pv-stage{flex:1;min-height:0;position:relative}
+.pv-stage .pv-ph{position:absolute;inset:0;border-radius:0;background-color:#000}
+.pv-stage .pv-ph img{object-fit:contain;filter:blur(1px)}
+.pv-stage .pv-full{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .2s}
+.pv-stage .pv-full.on{opacity:1}
+.pv-stage .pv-full.broken{display:none}
+.pv-nav{position:absolute;top:50%;margin-top:-26px;width:44px;height:52px;border:0;border-radius:12px;background:rgba(255,255,255,.12);color:#fff;font-size:30px;line-height:1;padding:0 0 4px;z-index:2}
+.pv-nav.prev{left:max(10px, env(safe-area-inset-left))} .pv-nav.next{right:max(10px, env(safe-area-inset-right))}
+.pv-bot{flex:none;padding:12px 16px calc(env(safe-area-inset-bottom) + 16px);text-align:center;color:var(--muted);font-size:13.5px}
 </style>
 </head>
 <body>
@@ -347,20 +390,20 @@ textarea.plain{font-family:var(--font);font-size:16px;min-height:72px}
 
 var BUILD = 'pwa';
 var LS_KEY = 'healthhub.v1';
-var APP_VERSION = '1.0';
+var APP_VERSION = '1.1';
 
 /* =========================================================
    State
    ========================================================= */
 function defaultState(){
-  return { v:1, weights:[], lifts:[], runs:[], steps:[],
+  return { v:1, weights:[], lifts:[], runs:[], steps:[], checkins:[],
     goals:{ weight:null, volume:null, distance:null, steps:null },
     prefs:{ weekStart:1, restDefault:90, restByEx:{} },
     routines:[], customExercises:[] };
 }
 var state = defaultState();
 var ui = { view:'overview', ranges:{}, showAll:{} };
-var KINDS = ['weights','lifts','runs','steps'];
+var KINDS = ['weights','lifts','runs','steps','checkins'];
 
 /* =========================================================
    Utilities
@@ -653,7 +696,7 @@ function applySnapshot(docs){
       if (Array.isArray(data.customExercises)) next.customExercises = data.customExercises.slice();
       return;
     }
-    var m = /^(weights|lifts|runs|steps)-(\d{4})(?:-\d{2})?$/.exec(id);
+    var m = /^(weights|lifts|runs|steps|checkins)-(\d{4})(?:-\d{2})?$/.exec(id);
     if (m){
       (Store.known[m[1]] = Store.known[m[1]] || {})[id] = 1;
       (Array.isArray(data.entries) ? data.entries : []).forEach(function(e){ if (e && isDate(e.date)) next[m[1]].push(Object.assign({}, e)); });
@@ -922,7 +965,7 @@ async function logout(force){
   var clean = !Object.keys(Acc.dirty).length;
   try { if (clean) localStorage.removeItem(cacheKey()); } catch(e){}
   wkDrop();
-  Acc.user = null; Acc.q = {}; Acc.inflight = {}; Acc.dirty = {};
+  Acc.user = null; Acc.q = {}; Acc.inflight = {}; Acc.dirty = {}; PH.urls = {}; PH.waiting = {};
   Store.mode = 'loading'; Store.name = '';
   state = defaultState(); ui.ranges = {}; ui.showAll = {};
   try { await sb.auth.signOut({ scope:'local' }); } catch(e){}
@@ -970,6 +1013,7 @@ function render(){
   else html += viewMetric(v === 'lifting' ? 'volume' : v === 'running' ? 'distance' : 'steps');
   main.innerHTML = html;
   mountCharts();
+  hydratePhotos(main);
 }
 
 function statusChip(kind, text){
@@ -1010,6 +1054,7 @@ function viewOverview(){
        qbtn('steps', 'Steps', '<path d="M8 3c2 0 3 2 3 5s-1 5-3 5-3-2-3-5 1-5 3-5zM6 15h4v2a2 2 0 0 1-4 0zM16 7c2 0 3 2 3 5s-1 5-3 5-3-2-3-5 1-5 3-5zM14 19h4v.5a2 2 0 0 1-4 0z"/>') +
        '</div>';
 
+  h += checkinTodayHtml();
   h += '<div class="section-title">This week</div>';
   // weight card
   var r = weightStatus();
@@ -1087,6 +1132,7 @@ function viewWeight(){
     h += '</div>';
   }
   h += '<div class="btn-row"><button class="btn primary" data-act="add" data-kind="weight">+ Log weight</button></div>';
+  h += checkinListHtml();
   h += historyCard('weights');
   return h;
 }
@@ -1736,11 +1782,372 @@ function hevySheet(){
 }
 
 /* =========================================================
+   Weekly check-ins: each Sunday, an optional weight, a summary of the week and up to 5 progress photos.
+   Photos live in a private Supabase bucket (installed app) or as this page's assets (Claude version);
+   the check-in rows only keep pointers to them.
+   ========================================================= */
+var CI_MAX = 5;
+var PH_BUCKET = 'progress-photos';
+var PH = { urls:{}, waiting:{} };
+var CAMERA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+function noop(){}
+function isSunday(n){ return new Date(n*864e5).getUTCDay() === 0; }
+function sundayOnOrBefore(n){ return n - new Date(n*864e5).getUTCDay(); }
+function checkinOn(date, exceptId){ for (var i = 0; i < state.checkins.length; i++){ var c = state.checkins[i]; if (c.date === date && c.id !== exceptId) return c; } return null; }
+function ciPhotos(c){ return Array.isArray(c && c.photos) ? c.photos.filter(function(p){ return p && p.full && p.thumb; }) : []; }
+function ciKg(c){
+  var w = c.weightId ? findEntry('weights', c.weightId) : null;
+  return w && w.date === c.date ? +w.kg : (c.kg != null ? +c.kg : null);
+}
+function ciPrevWithKg(c){
+  for (var i = state.checkins.length - 1; i >= 0; i--){ var o = state.checkins[i]; if (o.date < c.date && ciKg(o) != null) return o; }
+  return null;
+}
+function ciDateLong(d){ var n = dnum(d), x = new Date(n*864e5); return DOWL[x.getUTCDay()] + ' ' + x.getUTCDate() + ' ' + MONTHS[x.getUTCMonth()] + (d.slice(0,4) !== todayStr().slice(0,4) ? ' ' + d.slice(0,4) : ''); }
+function ciFirstLine(s){ return String(s || '').split(/\n/).filter(function(x){ return x.trim(); })[0] || ''; }
+
+/* ---------- where photos are kept ---------- */
+function photoVia(){ return Store.mode === 'account' ? 'sb' : Store.mode === 'cloud' ? 'asset' : null; }
+async function photoAssets(){
+  if (!(window.claude && typeof window.claude.use === 'function')) return null;
+  try { return await withTimeout(window.claude.use('assets'), 8000); } catch(e){ return null; }
+}
+async function photosAvailable(){
+  var v = photoVia();
+  if (v === 'sb') return !!(sb && sb.storage && Acc.user);
+  if (v === 'asset') return !!(await photoAssets());
+  return false;
+}
+function photoTag(p, which){
+  return '<img data-via="' + esc(p.via) + '" data-ref="' + esc(which === 'full' ? p.full : p.thumb) + '" alt="" decoding="async">';
+}
+function phCached(via, ref){ var c = PH.urls[via + ':' + ref]; return c && (!c.exp || c.exp > Date.now() + 60000) ? c.url : null; }
+function hydratePhotos(root){
+  var need = [];
+  $all('img[data-ref]', root || document).forEach(function(img){
+    if (img.getAttribute('src') || img.classList.contains('broken')) return;
+    var via = img.getAttribute('data-via'), ref = img.getAttribute('data-ref'), u = phCached(via, ref);
+    if (u){ img.src = u; return; }
+    if (via === 'asset' && Store.mode === 'cloud'){ img.src = '/_blob/' + ref; return; }
+    if (via === 'sb' && Store.mode === 'account' && sb && Acc.user && ref.indexOf(Acc.user.id + '/') === 0){
+      if (!PH.waiting[ref] && need.indexOf(ref) < 0) need.push(ref);
+      return;
+    }
+    img.classList.add('broken');               // kept by the other version of the app, or no storage here
+  });
+  if (need.length) signPhotos(need);
+}
+async function signPhotos(paths){
+  paths.forEach(function(p){ PH.waiting[p] = 1; });
+  var res;
+  try { res = await sb.storage.from(PH_BUCKET).createSignedUrls(paths, 3600); } catch(e){ res = { error:e }; }
+  var exp = Date.now() + 3600*1000;
+  if (res && !res.error && Array.isArray(res.data)) res.data.forEach(function(d){ if (d && d.path && d.signedUrl && !d.error) PH.urls['sb:' + d.path] = { url:d.signedUrl, exp:exp }; });
+  paths.forEach(function(p){ delete PH.waiting[p]; });
+  $all('img[data-ref]').forEach(function(img){
+    var ref = img.getAttribute('data-ref');
+    if (img.getAttribute('data-via') !== 'sb' || paths.indexOf(ref) < 0 || img.getAttribute('src')) return;
+    var u = phCached('sb', ref);
+    if (u) img.src = u; else img.classList.add('broken');
+  });
+}
+document.addEventListener('error', function(ev){
+  var t = ev.target;
+  if (t && t.tagName === 'IMG' && t.hasAttribute('data-ref')) t.classList.add('broken');
+}, true);
+
+/* ---------- preparing photos: shrink on the phone before uploading ---------- */
+function loadImageFile(file){
+  return new Promise(function(res, rej){
+    var u = URL.createObjectURL(file), im = new Image();
+    im.onload = function(){ res({ im:im, url:u }); };
+    im.onerror = function(){ URL.revokeObjectURL(u); rej(new Error('decode')); };
+    im.src = u;
+  });
+}
+function scaledJpeg(im, w0, h0, edge, q){
+  var s = Math.min(1, edge / Math.max(w0, h0)), w = Math.max(1, Math.round(w0*s)), h = Math.max(1, Math.round(h0*s));
+  var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  var cx = cv.getContext('2d'); cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = 'high';
+  cx.drawImage(im, 0, 0, w, h);
+  return new Promise(function(res, rej){
+    cv.toBlob(function(b){ cv.width = cv.height = 0; if (b && b.size) res({ blob:b, w:w, h:h }); else rej(new Error('encode')); }, 'image/jpeg', q);
+  });
+}
+async function preparePhoto(file){
+  var L = await loadImageFile(file);
+  try {
+    var W = L.im.naturalWidth, H = L.im.naturalHeight;
+    if (!W || !H) throw new Error('decode');
+    var full = await scaledJpeg(L.im, W, H, 1600, 0.82);
+    var th = await scaledJpeg(L.im, W, H, 400, 0.74);
+    return { pid:uid(), full:full.blob, thumb:th.blob, w:full.w, h:full.h, fullUrl:URL.createObjectURL(full.blob), thumbUrl:URL.createObjectURL(th.blob) };
+  } finally { URL.revokeObjectURL(L.url); }
+}
+async function uploadPhoto(ciId, it){
+  var via = photoVia();
+  if (via === 'sb'){
+    var base = Acc.user.id + '/' + ciId + '/' + it.pid, st = sb.storage.from(PH_BUCKET), opts = { contentType:'image/jpeg', upsert:true, cacheControl:'31536000' };
+    var r1 = await st.upload(base + '.jpg', it.full, opts);
+    if (r1 && r1.error) throw r1.error;
+    var r2 = await st.upload(base + '_t.jpg', it.thumb, opts);
+    if (r2 && r2.error){ st.remove([base + '.jpg']).catch(noop); throw r2.error; }
+    PH.urls['sb:' + base + '.jpg'] = { url:it.fullUrl, exp:0 }; PH.urls['sb:' + base + '_t.jpg'] = { url:it.thumbUrl, exp:0 };
+    return { id:it.pid, via:'sb', full:base + '.jpg', thumb:base + '_t.jpg', w:it.w, h:it.h };
+  }
+  if (via === 'asset'){
+    var a = await photoAssets();
+    if (!a) throw { code:'not_granted' };
+    var f = await a.upload(it.full, { type:'image/jpeg' }), t;
+    try { t = await a.upload(it.thumb, { type:'image/jpeg' }); } catch(e){ a.delete(f.id).catch(noop); throw e; }
+    PH.urls['asset:' + f.id] = { url:it.fullUrl, exp:0 }; PH.urls['asset:' + t.id] = { url:it.thumbUrl, exp:0 };
+    return { id:it.pid, via:'asset', full:f.id, thumb:t.id, w:it.w, h:it.h };
+  }
+  throw { code:'no_storage' };
+}
+async function removePhotos(list){
+  var paths = [], ids = [];
+  (list || []).forEach(function(p){
+    if (!p) return;
+    if (p.via === 'sb') paths.push(p.full, p.thumb); else if (p.via === 'asset') ids.push(p.full, p.thumb);
+  });
+  if (paths.length && Store.mode === 'account' && sb && sb.storage){ try { await sb.storage.from(PH_BUCKET).remove(paths); } catch(e){} }
+  if (ids.length && Store.mode === 'cloud'){
+    var a = await photoAssets();
+    if (a) for (var i = 0; i < ids.length; i++){ try { await a.delete(ids[i]); } catch(e){} }
+  }
+}
+function photoErrMsg(e){
+  var code = e && (e.code || e.error), msg = String((e && (e.message || e.statusCode)) || '').toLowerCase();
+  if (offlineNow()) return 'You’re offline. Photos need a connection to upload — try again when you’re back online, or remove them to save the rest now.';
+  if (code === 'too_large' || msg.indexOf('413') >= 0 || msg.indexOf('too large') >= 0 || msg.indexOf('exceeded the maximum') >= 0) return 'That photo is too big to upload.';
+  if (code === 'quota_or_state' || msg.indexOf('quota') >= 0) return 'Photo storage is full, so the photos weren’t saved.';
+  if (code === 'rate_limited') return 'Too many uploads at once — wait a moment and try again.';
+  if (code === 'not_granted' || code === 'no_storage' || code === 'capability_disabled') return 'Photos can’t be saved here right now. Remove them to save the rest of your check-in.';
+  if (msg.indexOf('row-level security') >= 0 || msg.indexOf('jwt') >= 0 || msg.indexOf('unauthorized') >= 0) return 'Your login has expired — log out and back in, then try again.';
+  return 'Couldn’t upload the photos — check your connection and try again.';
+}
+
+/* ---------- weight: a check-in weight is also a weigh-in, so it shows on the chart ---------- */
+function syncCheckinWeight(c, kg){
+  var w = c.weightId ? findEntry('weights', c.weightId) : null;
+  if (w && w.date !== c.date && w.src !== 'checkin') w = null;                 // never move a weigh-in logged by hand
+  if (!w) w = last(state.weights.filter(function(x){ return x.date === c.date; })) || null;
+  if (kg == null){
+    if (w && w.src === 'checkin' && w.id === c.weightId) state.weights = state.weights.filter(function(x){ return x !== w; });
+    delete c.weightId;
+    return;
+  }
+  if (w){ w.kg = kg; w.date = c.date; }
+  else { w = { id:uid(), date:c.date, kg:kg, note:'Weekly check-in', src:'checkin', ts:Date.now() }; state.weights.push(w); }
+  c.weightId = w.id;
+  sortList('weights');
+}
+
+/* ---------- Today (Sundays) and the Weight tab ---------- */
+function ciThumbs(c){
+  var ps = ciPhotos(c);
+  return ps.length ? '<div class="ci-thumbs">' + ps.map(function(p){ return '<span class="ph">' + photoTag(p, 'thumb') + '</span>'; }).join('') + '</div>' : '';
+}
+function checkinTodayHtml(){
+  var tn = tnum();
+  if (!isSunday(tn)) return '';
+  var c = checkinOn(dstr(tn)), h = '<div class="section-title">Sunday check-in</div>';
+  if (!c) return h + '<button class="card link ci-cta" data-act="checkin" data-date="' + dstr(tn) + '"><span class="ci-ic">' + CAMERA + '</span>' +
+    '<span class="ci-t"><span class="t">How did this week go?</span><span class="s">Log your weight, a quick summary and up to ' + CI_MAX + ' progress photos. All optional.</span></span>' + ARROW + '</button>';
+  var kg = ciKg(c), bits = [];
+  if (kg != null) bits.push(f1(kg) + ' kg');
+  var np = ciPhotos(c).length; if (np) bits.push(np + ' photo' + (np === 1 ? '' : 's'));
+  h += '<button class="card link" data-act="viewci" data-id="' + esc(c.id) + '"><div class="row top"><div style="min-width:0"><div class="label">This week’s check-in</div>' +
+       '<div class="med" style="margin-top:6px">' + esc(bits.length ? bits.join(' · ') : 'Checked in') + '</div>' +
+       (c.summary ? '<div class="small text-2 sm-gap ellip">' + esc(ciFirstLine(c.summary)) + '</div>' : '') + '</div>' + statusChip('good', 'Done') + '</div>' + ciThumbs(c) + '</button>';
+  return h;
+}
+function checkinListHtml(){
+  var items = state.checkins.slice().reverse(), lim = ui.showAll.checkins ? items.length : 8;
+  var h = '<div class="row" style="margin:24px 2px 10px"><div class="section-title" style="margin:0">Weekly check-ins</div><button class="btn ghost" data-act="checkin">+ Check-in</button></div>';
+  h += '<div class="card list" style="padding:0">';
+  if (!items.length) h += '<div class="empty-note">No check-ins yet. Each Sunday you can log your weight, a few lines on the week and up to ' + CI_MAX + ' progress photos.</div>';
+  items.slice(0, lim).forEach(function(c){
+    var kg = ciKg(c), prev = kg != null ? ciPrevWithKg(c) : null, d = '';
+    if (prev){ var dl = kg - ciKg(prev); d = '<span class="' + (dl < 0 ? 'delta-down' : 'delta-up') + '">' + signed1(dl) + '</span>'; }
+    h += '<button class="item ci-item" data-act="viewci" data-id="' + esc(c.id) + '"><div class="ci-row"><div style="min-width:0"><div class="t1">' + esc(relDay(c.date) === 'Today' ? 'Today' : fmtD(c.date, { dow:true, year: c.date.slice(0,4) !== todayStr().slice(0,4) })) + '</div>' +
+         (c.summary ? '<div class="t2 ellip">' + esc(ciFirstLine(c.summary)) + '</div>' : '') + '</div>' +
+         '<div class="r">' + (kg != null ? '<div class="t1">' + f1(kg) + ' kg</div><div class="t2">' + d + '</div>' : '<div class="t2">no weight</div>') + '</div></div>' + ciThumbs(c) + '</button>';
+  });
+  if (items.length > lim) h += '<button class="more" data-act="more" data-list="checkins">Show all ' + items.length + '</button>';
+  return h + '</div>';
+}
+
+/* ---------- looking at a check-in ---------- */
+function checkinView(c){
+  var kg = ciKg(c), prev = kg != null ? ciPrevWithKg(c) : null, ps = ciPhotos(c);
+  var body = '<div class="label">' + esc(ciDateLong(c.date)) + '</div>';
+  body += kg != null ? '<div class="big tnum">' + f1(kg) + '<small>kg</small></div>' + (prev ? '<div class="small text-2 sm-gap">' + signed1(kg - ciKg(prev)) + ' kg since ' + esc(fmtD(prev.date)) + '’s check-in</div>' : '')
+                     : '<div class="med muted" style="margin-top:6px">No weight logged</div>';
+  if (c.summary) body += '<div class="label" style="margin-top:20px">The week</div><p class="ci-sum">' + esc(c.summary) + '</p>';
+  if (ps.length) body += '<div class="label" style="margin:20px 0 10px">Progress photos</div><div class="ci-grid">' + ps.map(function(p, i){ return '<button type="button" class="ph" data-pv="' + i + '" aria-label="Open photo ' + (i+1) + '">' + photoTag(p, 'thumb') + '</button>'; }).join('') + '</div>';
+  body += '<div class="md-gap"><button class="btn block" data-edit>Edit check-in</button></div>';
+  openSheet('Weekly check-in', body, function(sh){
+    hydratePhotos(sh);
+    $all('[data-pv]', sh).forEach(function(b){ b.addEventListener('click', function(){ openViewer(ps, +b.getAttribute('data-pv'), fmtD(c.date, { dow:true, year:true })); }); });
+    $('[data-edit]', sh).addEventListener('click', function(){ closeSheet(); setTimeout(function(){ checkinSheet(c); }, 280); });
+  });
+}
+
+/* ---------- logging / editing a check-in ---------- */
+function checkinSheet(c, forDate){
+  var tn = tnum(), today = todayStr(), lw = last(state.weights);
+  var newest = sundayOnOrBefore(tn), choices = [];
+  for (var i = 0; i < 12; i++){ var d = dstr(newest - 7*i); if (!checkinOn(d, c && c.id)) choices.push(d); }
+  if (c && choices.indexOf(c.date) < 0) choices.unshift(c.date);
+  if (!choices.length){ toast('You’ve checked in every Sunday for the last 12 weeks'); return; }
+  var date = c ? c.date : (forDate && choices.indexOf(forDate) >= 0 ? forDate : choices[0]);
+  var same = c ? null : last(state.weights.filter(function(x){ return x.date === date; }));
+  var kgVal = c ? ciKg(c) : (same ? same.kg : null);
+  var items = ciPhotos(c).map(function(p){ return { saved:p }; }), removed = [], busy = false, avail = null;
+  var opts = choices.map(function(d){ return '<option value="' + d + '"' + (d === date ? ' selected' : '') + '>' + (d === today ? 'Today, ' : '') + esc(fmtD(d, { dow:true, year: d.slice(0,4) !== today.slice(0,4) })) + '</option>'; }).join('');
+  var body = '<form novalidate>' +
+    field('Sunday', '<select name="date">' + opts + '</select>') +
+    field('Weight (kg)', '<input name="kg" inputmode="decimal" autocomplete="off" placeholder="' + (lw ? f1(lw.kg) : 'e.g. 84.6') + '" value="' + (kgVal != null ? esc(String(kgVal)) : '') + '">', 'Optional. It’s added to your weigh-ins too.') +
+    field('How did the week go?', '<textarea class="plain" name="summary" rows="4" maxlength="2000" placeholder="Wins, struggles, energy, sleep, anything worth remembering…">' + esc(c && c.summary || '') + '</textarea>', 'Optional.') +
+    '<div class="field"><span>Progress photos</span><div class="ci-photos" data-grid></div><div class="hint" data-phnote>Up to ' + CI_MAX + '.</div></div>' +
+    '<div class="err"></div><button class="btn primary block" type="submit">' + (c ? 'Save changes' : 'Save check-in') + '</button>' +
+    (c ? '<div class="md-gap"><button class="btn block danger" type="button" data-del>Delete check-in</button></div>' : '') + '</form>';
+  openSheet(c ? 'Edit check-in' : 'Weekly check-in', body, function(sh){
+    var f = $('form', sh), grid = $('[data-grid]', sh), note = $('[data-phnote]', sh), btn = $('button[type=submit]', sh);
+    function drawGrid(){
+      var h = items.map(function(it, i){
+        var img = it.saved ? photoTag(it.saved, 'thumb') : it.pend ? '<img src="' + it.pend.thumbUrl + '" alt="">' : '';
+        return '<div class="ci-tile' + (it.busy ? ' busy' : '') + '"><span class="ph">' + img + '</span>' +
+               (it.busy ? '<span class="ci-spin"><span class="spin"></span></span>' : '<button type="button" class="ci-x" data-rm="' + i + '" aria-label="Remove photo ' + (i+1) + '">×</button>') + '</div>';
+      }).join('');
+      if (items.length < CI_MAX) h += '<label class="ci-add' + (avail === false ? ' off' : '') + '">' + CAMERA + '<span>Add photo' + (CI_MAX - items.length > 1 ? 's' : '') + '</span><small>' + items.length + ' of ' + CI_MAX + '</small>' +
+        '<input class="sr" type="file" accept="image/*" multiple data-file' + (avail === false ? ' disabled' : '') + '></label>';
+      grid.innerHTML = h;
+      hydratePhotos(grid);
+      var fi = $('[data-file]', grid); if (fi) fi.addEventListener('change', onPick);
+      $all('[data-rm]', grid).forEach(function(b){ b.addEventListener('click', function(){
+        if (busy) return;
+        var it = items.splice(+b.getAttribute('data-rm'), 1)[0];
+        if (it && it.saved) removed.push(it.saved);
+        drawGrid();
+      }); });
+    }
+    async function onPick(ev){
+      var files = Array.prototype.slice.call(ev.target.files || []), room = CI_MAX - items.length;
+      ev.target.value = '';
+      if (!files.length) return;
+      formErr(sh, '');
+      if (files.length > room) toast('Only ' + CI_MAX + ' photos per check-in — added the first ' + room);
+      var batch = files.slice(0, room).map(function(file){ return { busy:true, file:file }; });
+      items = items.concat(batch); drawGrid();
+      for (var k = 0; k < batch.length; k++){
+        var it = batch[k];
+        try { it.pend = await preparePhoto(it.file); it.busy = false; }
+        catch(e){ items = items.filter(function(x){ return x !== it; }); formErr(sh, 'One photo couldn’t be read. Try a JPEG or PNG, or a screenshot of it.'); }
+        delete it.file;
+        drawGrid();
+      }
+    }
+    drawGrid();
+    if (!c){
+      var kgTouched = false;
+      f.kg.addEventListener('input', function(){ kgTouched = true; });
+      f.date.addEventListener('change', function(){
+        if (kgTouched) return;
+        var w = last(state.weights.filter(function(x){ return x.date === f.date.value; }));
+        f.kg.value = w ? String(w.kg) : '';
+      });
+    }
+    photosAvailable().then(function(ok){
+      avail = ok;
+      var mode = photoVia();
+      note.textContent = !ok ? (mode === 'asset' ? 'Photos can’t be saved on this page right now — your weight and summary still save.' : 'Photos need your account storage, which isn’t connected right now.')
+                       : 'Up to ' + CI_MAX + '. ' + (mode === 'sb' ? 'Only you can see them.' : 'Saved privately with this page.');
+      drawGrid();
+    });
+    f.addEventListener('submit', async function(ev){
+      ev.preventDefault();
+      if (busy) return;
+      formErr(sh, '');
+      var d = f.date.value, kgStr = f.kg.value.trim(), kg = kgStr ? parseDec(kgStr) : null, summary = f.summary.value.trim();
+      if (!isDate(d) || !isSunday(dnum(d))) return formErr(sh, 'Pick a Sunday.');
+      if (kgStr && !(kg >= 25 && kg <= 400)) return formErr(sh, 'Enter your weight in kg, e.g. 84.6 — or leave it blank.');
+      if (items.some(function(it){ return it.busy; })) return formErr(sh, 'Hang on — the photos are still being prepared.');
+      if (kg == null && !summary && !items.length) return formErr(sh, 'Add a weight, a few words on your week or a photo to save a check-in.');
+      if (checkinOn(d, c && c.id)) return formErr(sh, 'There’s already a check-in for that Sunday.');
+      var id = c ? c.id : uid(), pend = items.filter(function(it){ return it.pend && !it.saved; });
+      if (pend.length){
+        if (!(await photosAvailable())) return formErr(sh, photoErrMsg({ code:'no_storage' }));
+        busy = true; btn.disabled = true; btn.style.opacity = '.7';
+        var done = [];
+        try {
+          for (var k = 0; k < pend.length; k++){
+            btn.textContent = 'Uploading photo ' + (k+1) + ' of ' + pend.length + '…';
+            pend[k].saved = await uploadPhoto(id, pend[k].pend);
+            done.push(pend[k]);
+          }
+        } catch(e){
+          busy = false; btn.disabled = false; btn.style.opacity = ''; btn.textContent = c ? 'Save changes' : 'Save check-in';
+          removePhotos(done.map(function(it){ var s = it.saved; delete it.saved; return s; }));
+          return formErr(sh, photoErrMsg(e));
+        }
+      }
+      var entry = { id:id, date:d, summary: summary || undefined, kg: kg == null ? undefined : Math.round(kg*100)/100,
+                    photos: items.map(function(it){ return it.saved; }).filter(Boolean), weightId: c ? c.weightId : undefined, ts: c ? c.ts : Date.now() };
+      syncCheckinWeight(entry, entry.kg == null ? null : entry.kg);
+      var at = -1; state.checkins.forEach(function(x, j){ if (x.id === id) at = j; });
+      if (at >= 0) state.checkins[at] = entry; else state.checkins.push(entry);
+      sortList('checkins');
+      persist(['checkins', 'weights']);
+      if (removed.length) removePhotos(removed);
+      busy = false; closeSheet(); render(); toast(c ? 'Check-in updated' : 'Check-in saved');
+    });
+    if (c) confirmButton($('[data-del]', sh), 'Tap again to delete', function(){
+      state.checkins = state.checkins.filter(function(x){ return x.id !== c.id; });
+      persist(['checkins']);
+      removePhotos(ciPhotos(c));
+      closeSheet(); render(); toast('Check-in deleted');
+    });
+  });
+}
+
+/* ---------- full-screen photo viewer ---------- */
+function openViewer(photos, idx, label){
+  if (!photos.length) return;
+  var el = document.createElement('div'); el.className = 'pv'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Progress photos');
+  el.innerHTML = '<div class="pv-top"><span class="pv-c"></span><button class="icon-btn" data-pv-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>' +
+    '<div class="pv-stage"></div>' + (photos.length > 1 ? '<button class="pv-nav prev" data-pv-step="-1" aria-label="Previous photo">‹</button><button class="pv-nav next" data-pv-step="1" aria-label="Next photo">›</button>' : '') +
+    '<div class="pv-bot">' + esc(label || '') + '</div>';
+  document.body.appendChild(el);
+  var stage = $('.pv-stage', el), count = $('.pv-c', el);
+  function show(i){
+    idx = (i + photos.length) % photos.length;
+    var p = photos[idx];
+    stage.innerHTML = '<span class="ph pv-ph">' + photoTag(p, 'thumb') + '</span>' + photoTag(p, 'full').replace('<img ', '<img class="pv-full" ');
+    var full = $('.pv-full', stage); full.addEventListener('load', function(){ full.classList.add('on'); });
+    hydratePhotos(stage);
+    count.textContent = photos.length > 1 ? (idx + 1) + ' of ' + photos.length : '';
+  }
+  function close(){ document.removeEventListener('keydown', onKey); el.classList.remove('open'); setTimeout(function(){ el.remove(); }, 200); }
+  function onKey(e){ if (e.key === 'Escape') close(); else if (e.key === 'ArrowLeft') show(idx - 1); else if (e.key === 'ArrowRight') show(idx + 1); }
+  document.addEventListener('keydown', onKey);
+  $('[data-pv-close]', el).addEventListener('click', close);
+  $all('[data-pv-step]', el).forEach(function(b){ b.addEventListener('click', function(){ show(idx + +b.getAttribute('data-pv-step')); }); });
+  var x0 = null;
+  stage.addEventListener('pointerdown', function(e){ x0 = e.clientX; });
+  stage.addEventListener('pointerup', function(e){ if (x0 == null) return; var dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 50 && photos.length > 1) show(idx + (dx < 0 ? 1 : -1)); });
+  show(idx || 0);
+  requestAnimationFrame(function(){ el.classList.add('open'); });
+}
+
+/* =========================================================
    Settings, backup & restore
    ========================================================= */
 function backupJSON(){ return JSON.stringify({ app:'health-hub', version:1, exportedAt:new Date().toISOString(), data:state }, null, 1); }
 function settingsSheet(){
-  var counts = state.weights.length + ' weigh-ins · ' + state.lifts.length + ' sessions · ' + state.runs.length + ' runs · ' + state.steps.length + ' step days';
+  var counts = state.weights.length + ' weigh-ins · ' + state.lifts.length + ' sessions · ' + state.runs.length + ' runs · ' + state.steps.length + ' step days · ' + state.checkins.length + ' check-in' + (state.checkins.length === 1 ? '' : 's');
   var where = Store.mode === 'account' ? 'Your entries are saved to your own account, so you can log in on any phone or computer. Nobody else using the app can see them.'
             : Store.mode === 'cloud' ? 'Your entries are saved privately to your Claude account, so they’re the same on your phone and computer.'
             : Store.mode === 'local' && BUILD === 'pwa' ? 'Your entries are saved on this iPhone. Save a backup now and then — deleting the app from your Home Screen deletes its data.'
@@ -1830,7 +2237,9 @@ function settingsSheet(){
       persist(KINDS.concat(['settings'])); closeSheet(); render(); toast('Restored ' + added + ' entr' + (added === 1 ? 'y' : 'ies'));
     });
     confirmButton($('[data-wipe]', sh), 'Tap again to delete everything', function(){
+      var pics = []; state.checkins.forEach(function(c){ pics = pics.concat(ciPhotos(c)); });
       var ws = state.prefs.weekStart; state = defaultState(); state.prefs.weekStart = ws;
+      removePhotos(pics);
       persist(KINDS.concat(['settings'])); closeSheet(); render(); toast('All data deleted');
     });
   });
@@ -2615,6 +3024,8 @@ document.addEventListener('click', function(ev){
     if (kind === 'run') return runSheet();
     if (kind === 'steps') return stepsSheet();
   }
+  if (act === 'checkin') return checkinSheet(null, t.getAttribute('data-date'));
+  if (act === 'viewci'){ var ci = findEntry('checkins', t.getAttribute('data-id')); return ci ? checkinView(ci) : undefined; }
   if (act === 'goal') return kind === 'weight' ? weightGoalSheet() : weeklyGoalSheet(kind);
   if (act === 'range'){ ui.ranges[t.getAttribute('data-key')] = t.getAttribute('data-val'); return render(); }
   if (act === 'more'){ ui.showAll[t.getAttribute('data-list')] = true; return render(); }
