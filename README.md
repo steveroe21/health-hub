@@ -1,4 +1,4 @@
-# Health Hub
+# health hub.
 
 A personal health and weight-loss tracker that installs on iPhone as a home-screen app.
 
@@ -19,6 +19,12 @@ A personal health and weight-loss tracker that installs on iPhone as a home-scre
 3. Always open it from the Home Screen icon. It runs full-screen and works offline.
 
 Your data is stored on the phone (in the app's own storage), never in this repo. Use **Settings → Save backup file** now and then.
+
+## Brand
+
+From the Health Hub brand board: Egyptian Blue `#0F2D52`, Stone Blue `#7A8CA3`, Scarlet Red `#C6283D`.
+Display type is Archivo at its widest setting, a free stand-in for Monument Extended. Body text is Inter.
+Both fonts are bundled in `fonts/` under the SIL Open Font License. App icons are rendered by `tools/make-icons.mjs`.
 
 ## Project layout
 

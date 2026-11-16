@@ -1,6 +1,6 @@
 // Health Hub service worker: network first, cache fallback (works offline, picks up updates when online)
-const CACHE = 'healthhub-v4';
-const ASSETS = ['./', './index.html', './config.js', './vendor/supabase.js', './manifest.webmanifest', './icons/apple-touch-icon.png', './icons/icon-192.png', './icons/icon-512.png'];
+const CACHE = 'healthhub-v5';
+const ASSETS = ['./', './index.html', './config.js', './vendor/supabase.js', './fonts/archivo-wdth.woff2', './fonts/inter-wght.woff2', './manifest.webmanifest', './icons/apple-touch-icon.png', './icons/icon-192.png', './icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {

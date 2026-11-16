@@ -16,17 +16,29 @@ dist = f'{ROOT}/dist'
 shutil.rmtree(dist, ignore_errors=True)
 os.makedirs(f'{dist}/artifact'); os.makedirs(f'{dist}/HealthHub/icons')
 
+import base64
+def b64(path): return base64.b64encode(open(path, 'rb').read()).decode()
+FACES = [("Archivo Variable", "archivo-wdth.woff2", "font-weight:100 900;font-stretch:62% 125%"),
+         ("Inter Variable", "inter-wght.woff2", "font-weight:100 900")]
+def fontface(inline):
+    out = []
+    for fam, f, extra in FACES:
+        url = ('data:font/woff2;base64,' + b64(f'{ROOT}/fonts/{f}')) if inline else f'fonts/{f}'
+        out.append("@font-face{font-family:'%s';font-style:normal;font-display:swap;%s;src:url(%s) format('woff2-variations'),url(%s) format('woff2')}" % (fam, extra, url, url))
+    return '\n'.join(out)
+src = src.replace('%%LOGIN_HERO%%', 'data:image/jpeg;base64,' + b64(f'{ROOT}/img/login-hero.jpg'))
+
 # artifact build: no PWA head tags
-art = re.sub(r'<!--PWA-->.*?<!--/PWA-->\n?', '', src, flags=re.S).replace('%%BUILD%%', 'artifact')
+art = re.sub(r'<!--PWA-->.*?<!--/PWA-->\n?', '', src, flags=re.S).replace('%%BUILD%%', 'artifact').replace('/*%%FONTFACE%%*/', fontface(True))
 open(f'{dist}/artifact/index.html', 'w').write(art)
 
 # installable build
-pwa = src.replace('<!--PWA-->\n', '').replace('<!--/PWA-->\n', '').replace('%%BUILD%%', 'pwa')
+pwa = src.replace('<!--PWA-->\n', '').replace('<!--/PWA-->\n', '').replace('%%BUILD%%', 'pwa').replace('/*%%FONTFACE%%*/', fontface(False))
 open(f'{dist}/HealthHub/index.html', 'w').write(pwa)
 
 manifest = {
   "name": "Health Hub", "short_name": "Health Hub", "id": "./", "start_url": "./", "scope": "./",
-  "display": "standalone", "orientation": "portrait", "background_color": "#0e0f11", "theme_color": "#0e0f11",
+  "display": "standalone", "orientation": "portrait", "background_color": "#0F2D52", "theme_color": "#0F2D52",
   "icons": [
     {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
     {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
@@ -36,8 +48,8 @@ manifest = {
 open(f'{dist}/HealthHub/manifest.webmanifest', 'w').write(json.dumps(manifest, indent=2))
 
 sw = """// Health Hub service worker: network first, cache fallback (works offline, picks up updates when online)
-const CACHE = 'healthhub-v4';
-const ASSETS = ['./', './index.html', './config.js', './vendor/supabase.js', './manifest.webmanifest', './icons/apple-touch-icon.png', './icons/icon-192.png', './icons/icon-512.png'];
+const CACHE = 'healthhub-v5';
+const ASSETS = ['./', './index.html', './config.js', './vendor/supabase.js', './fonts/archivo-wdth.woff2', './fonts/inter-wght.woff2', './manifest.webmanifest', './icons/apple-touch-icon.png', './icons/icon-192.png', './icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
@@ -50,31 +62,12 @@ self.addEventListener('fetch', e => {
 open(f'{dist}/HealthHub/sw.js', 'w').write(sw)
 shutil.copy(f'{ROOT}/config.js', f'{dist}/HealthHub/config.js')
 shutil.copytree(f'{ROOT}/vendor', f'{dist}/HealthHub/vendor')
+shutil.copytree(f'{ROOT}/fonts', f'{dist}/HealthHub/fonts')
 
 def icon(size, maskable=False):
-    S = 1024
-    im = Image.new('RGB', (S, S), '#0e0f11')
-    d = ImageDraw.Draw(im)
-    if not maskable:
-        d.rounded_rectangle([0, 0, S, S], radius=0, fill='#121417')
-    inset = 0.22 if maskable else 0.16
-    x0, x1 = S*inset, S*(1-inset)
-    y0, y1 = S*(inset+0.04), S*(1-inset-0.02)
-    # goal line (dashed, orange)
-    gx0, gy0, gx1, gy1 = x0, y0 + (y1-y0)*0.12, x1, y0 + (y1-y0)*0.86
-    n = 9
-    for i in range(n):
-        if i % 2: continue
-        a = i/n; b = (i+1)/n
-        d.line([gx0+(gx1-gx0)*a, gy0+(gy1-gy0)*a, gx0+(gx1-gx0)*b, gy0+(gy1-gy0)*b], fill='#e0782f', width=int(S*0.035))
-    # weight line (blue), wobbling down
-    pts = [(0.0,0.05),(0.14,0.16),(0.27,0.10),(0.42,0.33),(0.56,0.30),(0.71,0.55),(0.85,0.60),(1.0,0.80)]
-    P = [(x0+(x1-x0)*a, y0+(y1-y0)*b) for a,b in pts]
-    d.line(P, fill='#3987e5', width=int(S*0.06), joint='curve')
-    r = S*0.05
-    lx, ly = P[-1]
-    d.ellipse([lx-r, ly-r, lx+r, ly+r], fill='#3987e5', outline='#0e0f11', width=int(S*0.02))
-    return im.resize((size, size), Image.LANCZOS)
+    # rendered from the brand board by tools/make-icons.mjs (brand font, Egyptian Blue tile, red dot)
+    src = Image.open(f'{ROOT}/img/' + ('icon-maskable-src.png' if maskable else 'icon-src.png')).convert('RGB')
+    return src.resize((size, size), Image.LANCZOS)
 
 icon(180).save(f'{dist}/HealthHub/icons/apple-touch-icon.png')
 icon(192).save(f'{dist}/HealthHub/icons/icon-192.png')

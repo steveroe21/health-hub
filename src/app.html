@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0e0f11">
+<meta name="theme-color" content="#0F2D52">
 <meta name="color-scheme" content="dark">
 <!--PWA-->
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,25 +18,35 @@
 <!--/PWA-->
 <title>Health Hub</title>
 <style>
+/*%%FONTFACE%%*/
 :root{
   color-scheme: dark;
-  --bg:#0e0f11;
-  --surface:#17181b;
-  --surface-2:#212226;
-  --surface-3:#2a2b30;
-  --line:#2a2b30;
-  --text:#f0efec;
-  --text-2:#c3c2b7;
-  --muted:#8d8c86;
-  --accent:#3987e5;
-  --accent-ink:#ffffff;
-  --accent-soft:rgba(57,135,229,.16);
-  --goal:#e0782f;
-  --good:#0ca30c;  --good-ink:#7fd67f;  --good-bg:rgba(12,163,12,.16);
-  --warn:#fab219;  --warn-ink:#fbc95a;  --warn-bg:rgba(250,178,25,.14);
-  --bad:#e66767;   --bad-ink:#f09a9a;   --bad-bg:rgba(230,103,103,.15);
-  --radius:18px;
-  --font:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* brand board: Egyptian Blue #0F2D52 · Stone Blue #7A8CA3 · Scarlet Red #C6283D */
+  --brand:#0F2D52;
+  --stone:#7A8CA3;
+  --scarlet:#C6283D;
+  --dot:#E0354B;
+  --bg:#0B1E36;
+  --surface:#132C4C;
+  --surface-2:#1A3760;
+  --surface-3:#244573;
+  --line:rgba(122,140,163,.24);
+  --text:#ECE7E1;
+  --text-2:#C3CBD6;
+  --muted:#93A4BA;
+  --accent:#C6283D;
+  --accent-ink:#FFFFFF;
+  --link:#FF6B7E;
+  --accent-soft:rgba(198,40,61,.20);
+  --data:#5E8FD0;
+  --goal:#F0566A;
+  --grid:rgba(122,140,163,.18);
+  --good:#2FBF71;  --good-ink:#86E0AE;  --good-bg:rgba(47,191,113,.16);
+  --warn:#E9A83A;  --warn-ink:#F4C677;  --warn-bg:rgba(233,168,58,.16);
+  --bad:#C6283D;   --bad-ink:#FF8796;   --bad-bg:rgba(198,40,61,.22);
+  --radius:16px;
+  --font:"Inter Variable", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --display:"Archivo Variable", Archivo, "Arial Black", -apple-system, sans-serif;
   --tabbar-h:62px;
 }
 *{box-sizing:border-box}
@@ -46,32 +56,36 @@ button{font:inherit;color:inherit;cursor:pointer}
 .tnum{font-variant-numeric:tabular-nums}
 
 /* ---------- top bar ---------- */
-.topbar{position:sticky;top:0;z-index:20;background:rgba(14,15,17,.88);-webkit-backdrop-filter:saturate(1.4) blur(16px);backdrop-filter:saturate(1.4) blur(16px);padding:calc(env(safe-area-inset-top) + 12px) max(18px, env(safe-area-inset-right)) 10px max(18px, env(safe-area-inset-left));display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
-.topbar h1{font-size:30px;line-height:1.1;font-weight:750;letter-spacing:-.025em;margin:0}
-.topbar .sub{font-size:13px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:6px}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block}
-.sync-dot.ok{background:var(--good)} .sync-dot.busy{background:var(--warn)} .sync-dot.err{background:var(--bad)}
-.icon-btn{width:40px;height:40px;border-radius:50%;border:0;background:var(--surface-2);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(15,45,82,.92);-webkit-backdrop-filter:saturate(1.3) blur(16px);backdrop-filter:saturate(1.3) blur(16px);padding:calc(env(safe-area-inset-top) + 8px) max(16px, env(safe-area-inset-right)) 8px max(18px, env(safe-area-inset-left));display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);min-height:56px}
+.brand{font-family:var(--display);font-weight:800;font-stretch:125%;font-size:21px;letter-spacing:-.035em;line-height:1;color:var(--text);white-space:nowrap}
+.dot{display:inline-block;width:.2em;height:.2em;border-radius:50%;background:var(--dot);margin-left:.05em;color:transparent;overflow:hidden;line-height:0;vertical-align:baseline;flex:none}
+.page-head{max-width:760px;margin:0 auto;padding:18px max(18px, env(safe-area-inset-right)) 4px max(18px, env(safe-area-inset-left))}
+.page-head h1{font-family:var(--display);font-weight:800;font-stretch:125%;font-size:clamp(23px, 7.2vw, 32px);line-height:1.08;letter-spacing:-.03em;margin:0;overflow-wrap:anywhere}
+.page-head .sub{font-size:12.5px;color:var(--muted);margin-top:7px;display:flex;align-items:center;gap:6px}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block;flex:none}
+.sync-dot.ok{background:var(--good)} .sync-dot.busy{background:var(--warn)} .sync-dot.err{background:var(--dot)}
+.icon-btn{width:40px;height:40px;border-radius:12px;border:0;background:rgba(255,255,255,.06);display:inline-flex;align-items:center;justify-content:center;flex:none}
 .icon-btn svg{width:21px;height:21px}
 
-main{padding:6px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-area-inset-left));max-width:760px;margin:0 auto}
+main{padding:12px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-area-inset-left));max-width:760px;margin:0 auto}
 
 /* ---------- cards & text ---------- */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.card.link{transition:transform .12s}
 .card.link{display:block;width:100%;text-align:left;cursor:pointer}
 .card.link:active{transform:scale(.99)}
 .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .row.top{align-items:flex-start}
-.label{font-size:13px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em}
-.big{font-size:34px;font-weight:750;letter-spacing:-.02em;line-height:1.1;margin-top:4px}
-.big small{font-size:17px;font-weight:600;color:var(--text-2);margin-left:3px;letter-spacing:0}
-.med{font-size:22px;font-weight:700;letter-spacing:-.01em}
+.label{font-size:11.5px;font-weight:650;color:var(--muted);text-transform:uppercase;letter-spacing:.14em}
+.big{font-family:var(--display);font-stretch:118%;font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-top:6px;font-variant-numeric:tabular-nums}
+.big small{font-family:var(--font);font-stretch:100%;font-size:16px;font-weight:600;color:var(--text-2);margin-left:4px;letter-spacing:0}
+.med{font-family:var(--display);font-stretch:115%;font-size:20px;font-weight:750;letter-spacing:-.02em}
 .muted{color:var(--muted)}
 .text-2{color:var(--text-2)}
 .small{font-size:13px}
 .sm-gap{margin-top:6px}
 .md-gap{margin-top:12px}
-.section-title{font-size:20px;font-weight:700;margin:22px 2px 10px;letter-spacing:-.01em}
+.section-title{font-family:var(--display);font-stretch:118%;font-size:18px;font-weight:800;margin:24px 2px 10px;letter-spacing:-.02em}
 .hello{margin:4px 2px 14px}
 .hello .d{font-size:15px;color:var(--text-2)}
 .banner{background:var(--warn-bg);color:var(--warn-ink);border-radius:14px;padding:10px 14px;font-size:14px;margin-bottom:12px}
@@ -84,31 +98,42 @@ main{padding:6px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-a
 
 /* ---------- progress ---------- */
 .prog{position:relative;height:10px;border-radius:99px;background:var(--surface-3);margin-top:12px}
-.prog > i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--accent);max-width:100%}
-.prog > b{position:absolute;top:-4px;bottom:-4px;width:2px;border-radius:2px;background:var(--goal)}
+.prog > i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--data);max-width:100%}
+.prog > b{position:absolute;top:-4px;bottom:-4px;width:2px;border-radius:2px;background:var(--text)}
 
 /* ---------- stats grid ---------- */
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
 @media (min-width:560px){.stats{grid-template-columns:repeat(3,1fr)}}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
 .stat .k{font-size:12.5px;color:var(--muted);font-weight:600}
-.stat .v{font-size:19px;font-weight:700;margin-top:4px;letter-spacing:-.01em}
+.stat .v{font-size:19px;font-weight:750;margin-top:4px;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
 .stat .s{font-size:12px;color:var(--muted);margin-top:2px}
 
 /* ---------- buttons ---------- */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:650;font-size:16px;border-radius:14px;padding:13px 16px;border:0;background:var(--surface-2);color:var(--text);text-decoration:none;min-height:48px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:650;font-size:16px;border-radius:12px;padding:13px 16px;border:0;background:var(--surface-2);color:var(--text);text-decoration:none;min-height:48px}
 .btn:active{opacity:.8}
 .btn.primary{background:var(--accent);color:var(--accent-ink)}
 .btn.block{width:100%}
-.btn.ghost{background:transparent;color:var(--accent);padding:8px 4px;min-height:0;font-size:15px}
+.btn.ghost{background:transparent;color:var(--link);padding:8px 4px;min-height:0;font-size:15px}
 .btn.danger{color:var(--bad-ink)}
 .btn.small{font-size:14px;padding:8px 12px;border-radius:11px;min-height:36px}
 .btn svg{width:18px;height:18px}
 .btn-row{display:flex;gap:10px;margin-bottom:12px}
 .btn-row .btn{flex:1}
-.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
-.quick .btn{flex-direction:column;gap:4px;font-size:12.5px;padding:12px 4px;min-height:68px;background:var(--surface);border:1px solid var(--line)}
-.quick .btn svg{width:22px;height:22px;color:var(--accent)}
+.hero-card{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--scarlet);color:#fff;border:0;border-radius:14px;padding:18px 18px;margin:4px 0 10px;box-shadow:0 10px 26px rgba(198,40,61,.22)}
+.hero-card:active,.qt:active{transform:scale(.985)}
+.hero-card .hc-ic{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;flex:none}
+.hero-card .hc-ic svg{width:26px;height:26px}
+.hero-card .hc-t{flex:1;min-width:0;display:flex;flex-direction:column}
+.hero-card .t{font-family:var(--display);font-stretch:118%;font-weight:800;font-size:19px;letter-spacing:-.02em}
+.hero-card .s{font-size:13.5px;opacity:.85;margin-top:3px}
+.arr{width:22px;height:22px;flex:none;opacity:.9}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:6px}
+.qt{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 12px;color:var(--text);font-weight:650;font-size:14.5px;min-height:52px;position:relative}
+.qt svg{width:20px;height:20px;color:var(--stone);flex:none}
+.qt span{flex:1;text-align:left}
+.qt b{color:var(--link);font-size:18px;font-weight:600;line-height:1}
+@media (max-width:360px){.qt b{display:none}.qt{padding:12px 10px;font-size:13.5px}}
 
 /* ---------- segmented ---------- */
 .seg{display:flex;background:var(--surface-2);border-radius:11px;padding:3px;gap:2px;margin:14px 0 6px}
@@ -120,13 +145,13 @@ main{padding:6px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-a
 .chart svg{display:block;width:100%;overflow:visible}
 .chart .empty{height:200px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:14px;padding:0 20px}
 .chart text{font-family:var(--font);font-size:11px;fill:var(--muted)}
-.tip{position:absolute;z-index:5;pointer-events:none;background:rgba(10,10,12,.96);border:1px solid var(--surface-3);border-radius:12px;padding:8px 11px;font-size:12.5px;line-height:1.45;color:var(--text);white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.45);display:none}
+.tip{position:absolute;z-index:5;pointer-events:none;background:rgba(6,18,34,.97);border:1px solid var(--surface-3);border-radius:12px;padding:8px 11px;font-size:12.5px;line-height:1.45;color:var(--text);white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.45);display:none}
 .tip .t{color:var(--text-2);font-weight:600;margin-bottom:2px}
 .tip .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:0}
 .tip .ln{display:inline-block;width:12px;height:0;border-top:2px dashed var(--goal);margin-right:5px;vertical-align:3px}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text-2);margin-top:8px}
 .legend span{display:inline-flex;align-items:center;gap:6px}
-.legend .sw{width:10px;height:10px;border-radius:3px;background:var(--accent)}
+.legend .sw{width:10px;height:10px;border-radius:3px;background:var(--data)}
 .legend .sw.dot{border-radius:50%}
 .legend .ln{width:16px;border-top:2px dashed var(--goal)}
 
@@ -140,15 +165,17 @@ main{padding:6px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-a
 .list .r{text-align:right;flex:none}
 .list .r .t1{font-variant-numeric:tabular-nums}
 .list .head{padding:10px 16px 4px;font-size:12.5px;font-weight:650;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
-.list .more{display:block;width:100%;padding:12px;border:0;border-top:1px solid var(--line);background:none;color:var(--accent);font-weight:600}
+.list .more{display:block;width:100%;padding:12px;border:0;border-top:1px solid var(--line);background:none;color:var(--link);font-weight:600}
 .empty-note{padding:18px 16px;color:var(--muted);font-size:14px;text-align:center}
 .delta-down{color:var(--good-ink)} .delta-up{color:var(--text-2)}
 
 /* ---------- tab bar ---------- */
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:space-around;background:rgba(20,21,24,.92);-webkit-backdrop-filter:saturate(1.4) blur(16px);backdrop-filter:saturate(1.4) blur(16px);border-top:1px solid var(--line);padding:6px max(4px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(4px, env(safe-area-inset-left))}
-.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:600;color:var(--muted);background:none;border:0;padding:5px 0;min-height:50px}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:space-around;background:rgba(15,45,82,.96);-webkit-backdrop-filter:saturate(1.4) blur(16px);backdrop-filter:saturate(1.4) blur(16px);border-top:1px solid var(--line);padding:6px max(4px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(4px, env(safe-area-inset-left))}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:600;color:var(--stone);background:none;border:0;padding:5px 0;min-height:50px}
 .tab svg{width:25px;height:25px}
-.tab.on{color:var(--accent)}
+.tab.on{color:var(--text)}
+.tab{position:relative}
+.tab.on::after{content:'';position:absolute;top:-6px;left:50%;width:22px;height:3px;margin-left:-11px;border-radius:0 0 3px 3px;background:var(--scarlet)}
 
 /* ---------- sheet ---------- */
 .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;opacity:0;transition:opacity .22s}
@@ -157,7 +184,7 @@ main{padding:6px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-a
 .sheet.open{transform:none}
 .grab{width:38px;height:5px;border-radius:3px;background:var(--surface-3);margin:4px auto 8px}
 .sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.sheet-head h2{font-size:21px;margin:0;font-weight:700;letter-spacing:-.01em}
+.sheet-head h2{font-family:var(--display);font-stretch:115%;font-size:19px;margin:0;font-weight:800;letter-spacing:-.02em;line-height:1.2}
 .sheet p{color:var(--text-2);font-size:14.5px;line-height:1.45;margin:0 0 12px}
 .sheet hr{border:0;border-top:1px solid var(--line);margin:18px 0}
 .field{display:block;margin-bottom:14px}
@@ -182,9 +209,9 @@ textarea{min-height:90px;resize:vertical;font-size:14px;font-family:ui-monospace
 .preview .pi:first-child{border-top:0}
 
 /* ---------- toast & loader ---------- */
-.toast{position:fixed;left:50%;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 18px);transform:translateX(-50%) translateY(20px);background:#f0efec;color:#111;padding:11px 18px;border-radius:999px;font-size:14.5px;font-weight:650;z-index:80;opacity:0;transition:all .25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast{font-weight:650;position:fixed;left:50%;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 18px);transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--brand);padding:11px 18px;border-radius:999px;font-size:14.5px;font-weight:650;z-index:80;opacity:0;transition:all .25s;pointer-events:none;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.loader{position:fixed;inset:0;z-index:90;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--text-2);font-size:15px}
+.loader{position:fixed;inset:0;z-index:90;background:var(--brand);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;color:var(--text-2);font-size:15px}
 .spin{width:28px;height:28px;border-radius:50%;border:3px solid var(--surface-3);border-top-color:var(--accent);animation:sp 0.8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
@@ -192,11 +219,14 @@ textarea{min-height:90px;resize:vertical;font-size:14px;font-family:ui-monospace
 .topbar h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* ---------- login ---------- */
-.auth{position:fixed;inset:0;z-index:85;background:var(--bg);overflow-y:auto;display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top) + 24px) max(20px, env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 24px) max(20px, env(safe-area-inset-left))}
-.auth-card{width:100%;max-width:400px}
+.auth{position:fixed;inset:0;z-index:85;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.auth-hero{position:relative;height:calc(min(34vh, 260px) + env(safe-area-inset-top));background-size:cover;background-position:62% 40%;display:flex;align-items:flex-end;padding:0 max(22px, env(safe-area-inset-left)) 20px}
+.auth-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg, rgba(15,45,82,.35) 0%, rgba(15,45,82,.55) 45%, var(--bg) 100%)}
+.auth-brand{position:relative;font-size:clamp(28px, 9vw, 38px)}
+.auth-card{width:100%;max-width:440px;margin:0 auto;padding:10px max(22px, env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 28px) max(22px, env(safe-area-inset-left))}
 .auth-logo{width:64px;height:64px;border-radius:16px;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;margin-bottom:18px}
 .auth-logo svg{width:40px;height:40px}
-.auth h1{font-size:32px;font-weight:750;letter-spacing:-.025em;margin:0 0 6px}
+.auth h1{font-family:var(--display);font-stretch:118%;font-size:24px;font-weight:800;letter-spacing:-.03em;margin:8px 0 6px}
 .auth .lead{color:var(--text-2);font-size:16px;margin:0 0 6px}
 .auth .seg{margin:22px 0 18px}
 .auth .note{background:var(--accent-soft);color:var(--text);border-radius:12px;padding:11px 13px;font-size:14px;line-height:1.45;margin-bottom:14px}
@@ -209,33 +239,33 @@ textarea{min-height:90px;resize:vertical;font-size:14px;font-family:ui-monospace
 .wk-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(env(safe-area-inset-top) + 8px) max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left));border-bottom:1px solid var(--line);flex:none}
 .wk-top .side{width:96px;display:flex;align-items:center}
 .wk-top .side.r{justify-content:flex-end}
-.wk-title{font-size:17px;font-weight:700;flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wk-title{font-family:var(--display);font-stretch:112%;font-size:16px;font-weight:800;letter-spacing:-.01em;flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wk-stats{display:flex;gap:22px;padding:10px 16px;border-bottom:1px solid var(--line);flex:none}
 .wk-stats .k{font-size:12px;color:var(--muted);font-weight:600}
 .wk-stats .v{font-size:16px;font-weight:650;margin-top:2px;font-variant-numeric:tabular-nums}
-.wk-stats .v.live{color:var(--accent)}
+.wk-stats .v.live{color:var(--text)}
 .rt-title{font-size:20px;font-weight:700;background:transparent;border:0;padding:4px 0;min-height:0}
 .wk-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 0 calc(120px + env(safe-area-inset-bottom))}
 .wk-inner{max-width:720px;margin:0 auto;padding:0 max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left))}
 .wk-empty{text-align:center;padding:52px 20px 28px;color:var(--text-2)}
 .wk-empty .ava{width:64px;height:64px;margin:0 auto}
-.wk-empty .ava svg{width:30px;height:30px;color:var(--accent)}
+.wk-empty .ava svg{width:30px;height:30px;color:var(--link)}
 .exc{padding:16px 0 12px;border-bottom:1px solid var(--line)}
 .exc-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.exc-name{display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;text-align:left;color:var(--accent);font-size:16.5px;font-weight:650;min-width:0;line-height:1.25}
+.exc-name{display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;text-align:left;color:var(--text);font-size:16.5px;font-weight:650;min-width:0;line-height:1.25}
 .ava{width:40px;height:40px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);color:var(--text-2);font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none;letter-spacing:.02em}
 .icon-btn.sm{width:34px;height:34px;background:transparent;font-size:20px;color:var(--text-2)}
 .exc-note{border:0;background:transparent;padding:8px 0 2px;min-height:0;font-size:15px;color:var(--text-2);border-radius:0}
 .exc-note:focus{border:0}
-.exc-rest{background:none;border:0;padding:6px 0;color:var(--accent);font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
-.exc-rest svg{width:16px;height:16px}
+.exc-rest{background:none;border:0;padding:6px 0;color:var(--text-2);font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.exc-rest svg{width:16px;height:16px;color:var(--dot)}
 .set-row{display:grid;grid-template-columns:var(--gc);align-items:center;gap:8px;padding:4px 6px;border-radius:9px;min-height:44px}
 .set-row.alt{background:var(--surface)}
 .set-row.hd{min-height:0;padding-top:4px;padding-bottom:4px;font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.05em}
 .set-row.hd > div{text-align:center}
 .set-row.done{background:var(--good-bg)}
 .set-no{background:var(--surface-2);border:0;border-radius:7px;height:30px;font-weight:700;font-size:14px;color:var(--text);padding:0}
-.set-no.w{color:var(--warn-ink)} .set-no.d{color:var(--accent)} .set-no.f{color:var(--bad-ink)}
+.set-no.w{color:var(--warn-ink)} .set-no.d{color:var(--data)} .set-no.f{color:var(--bad-ink)}
 .set-row.done .set-no{background:transparent}
 .set-prev{background:none;border:0;color:var(--muted);font-size:13.5px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0;min-width:0}
 .set-in{height:34px;min-height:0;padding:4px 4px;border-radius:8px;text-align:center;font-size:16px;font-weight:650;background:var(--surface-2);border:1px solid transparent;font-variant-numeric:tabular-nums}
@@ -250,7 +280,7 @@ textarea{min-height:90px;resize:vertical;font-size:14px;font-family:ui-monospace
 .rest-bar > div{flex:1}
 .rest-bar .rp{position:absolute;left:0;top:0;height:3px;background:var(--accent);transition:width .25s linear}
 .resume{position:fixed;left:12px;right:12px;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 10px);z-index:29;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-radius:14px;border:1px solid var(--accent);background:var(--surface);color:var(--text);font-size:15px;font-weight:650;box-shadow:0 8px 24px rgba(0,0,0,.45);max-width:736px;margin:0 auto}
-.resume b{color:var(--accent)}
+.resume b{color:var(--link)}
 .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--good);margin-right:8px;vertical-align:1px;animation:pulse 1.6s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.35}}
 body.has-resume{padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 84px)}
@@ -266,7 +296,7 @@ body.has-resume{padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom
 .pk-t .m{font-size:13px;color:var(--muted);margin-top:2px}
 .pk-info{background:none;border:0;color:var(--muted);width:40px;height:40px;display:flex;align-items:center;justify-content:center}
 .pk-info svg{width:20px;height:20px}
-.pk-foot{position:absolute;left:0;right:0;bottom:0;padding:24px max(14px, env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));background:linear-gradient(rgba(14,15,17,0), var(--bg) 40%)}
+.pk-foot{position:absolute;left:0;right:0;bottom:0;padding:24px max(14px, env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));background:linear-gradient(rgba(11,30,54,0), var(--bg) 40%)}
 .routine .t1{font-size:17px;font-weight:700}
 .wd-ex{padding:12px 0;border-top:1px solid var(--line)}
 .wd-set{display:flex;align-items:center;gap:12px;padding:4px 0;font-size:15px;font-variant-numeric:tabular-nums}
@@ -280,14 +310,15 @@ textarea.plain{font-family:var(--font);font-size:16px;min-height:72px}
 </head>
 <body>
 <header class="topbar">
-  <div>
-    <h1 id="title">Today</h1>
-    <div class="sub"><span class="sync-dot" id="syncDot"></span><span id="syncText">Loading…</span></div>
-  </div>
+  <div class="brand" role="img" aria-label="health hub">health hub<span class="dot">.</span></div>
   <button class="icon-btn" data-act="settings" aria-label="Settings">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
   </button>
 </header>
+<section class="page-head">
+  <h1 id="title">Today</h1>
+  <div class="sub"><span class="sync-dot" id="syncDot"></span><span id="syncText">Loading…</span></div>
+</section>
 
 <main id="main"></main>
 
@@ -301,7 +332,7 @@ textarea.plain{font-family:var(--font);font-size:16px;min-height:72px}
 
 <div id="sheetRoot"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<div class="loader" id="loader"><div class="spin"></div><div>Loading your data…</div></div>
+<div class="loader" id="loader"><div class="brand" style="font-size:30px">health hub<span class="dot">.</span></div><div class="spin"></div></div>
 
 <script>
 (function(){
@@ -792,16 +823,17 @@ function offerLegacyData(){
 }
 
 /* ---------- login screen ---------- */
+var HERO_IMG = '%%LOGIN_HERO%%';
 var LOGO = '<svg viewBox="0 0 40 40" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12l26 18" stroke="var(--goal)" stroke-width="3" stroke-dasharray="4 4"/><path d="M6 9l6 4 4-2 6 9 5-1 7 10" stroke="var(--accent)" stroke-width="3.5"/></svg>';
 function showAuth(mode, note){
   mode = mode || 'login';
   var el = $('#auth');
   if (!el){ el = document.createElement('div'); el.id = 'auth'; el.className = 'auth'; document.body.appendChild(el); }
   document.body.style.overflow = 'hidden';
+  var ld = $('#loader'); if (ld) ld.remove();
   var su = mode === 'signup';
-  el.innerHTML = '<div class="auth-card">' +
-    '<div class="auth-logo">' + LOGO + '</div>' +
-    '<h1>Health Hub</h1><p class="lead">' + (su ? 'Create your account. Your data is private to you.' : 'Log in to see your progress.') + '</p>' +
+  el.innerHTML = '<div class="auth-hero" style="background-image:url(' + HERO_IMG + ')"><div class="brand auth-brand">health hub<span class="dot">.</span></div></div><div class="auth-card">' +
+    '<h1>' + (su ? 'Create your account' : 'Welcome back') + '<span class="dot">.</span></h1><p class="lead">' + (su ? 'Your logs, goals and workouts stay private to you.' : 'Log in to see your progress.') + '</p>' +
     '<div class="seg" role="tablist"><button type="button" data-mode="login" class="' + (su ? '' : 'on') + '">Log in</button><button type="button" data-mode="signup" class="' + (su ? 'on' : '') + '">Create account</button></div>' +
     (note ? '<div class="note">' + note + '</div>' : '') +
     '<form novalidate>' +
@@ -921,7 +953,7 @@ function renderSoon(){ if (renderQueued) return; renderQueued = true; requestAni
 function render(){
   exIndexCache = null;
   var v = ui.view;
-  $('#title').textContent = v === 'overview' && firstName() ? 'Welcome ' + firstName() : TITLES[v];
+  $('#title').innerHTML = esc(v === 'overview' && firstName() ? 'Welcome ' + firstName() : TITLES[v]) + '<span class="dot">.</span>';
   $all('.tab').forEach(function(t){ t.classList.toggle('on', t.getAttribute('data-go') === v); });
   var main = $('#main'), html = '';
   if (Store.mode === 'local' && BUILD !== 'pwa') html += '<div class="banner">Couldn’t connect to your Claude account storage, so entries are only kept in this browser for now. Reopen the page to retry.</div>';
@@ -961,13 +993,17 @@ function viewOverview(){
   var tn = tnum(), d = new Date(tn*864e5), w = weekOf(tn);
   var h = '<div class="hello"><div class="d">' + DOWL[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()] +
           ' · day ' + (tn - w + 1) + ' of 7 this week</div></div>';
+  var live = WK && WK.mode !== 'routine';
+  h += '<button class="hero-card" data-act="' + (live ? 'resumewk' : 'add') + '" data-kind="lift">' +
+       '<span class="hc-ic">' + ICON.dumbbell + '</span><span class="hc-t"><span class="t">' + (live ? 'Resume workout' : 'Training') + '</span>' +
+       '<span class="s">' + (live ? esc(WK.title || 'Workout') + ' in progress' : 'Start a workout or a routine') + '</span></span>' + ARROW + '</button>';
   h += '<div class="quick">' +
        qbtn('weight', 'Weight', '<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 9a5 5 0 0 1 8 0l-2.5 3"/>') +
-       qbtn('lift', 'Lift', '<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>') +
        qbtn('run', 'Run', '<circle cx="15.5" cy="4.5" r="1.8"/><path d="M8 21l3-6 3 2v5M6 12l3-4 4 1 3 4 3 1M11 15l1.5-5"/>') +
        qbtn('steps', 'Steps', '<path d="M8 3c2 0 3 2 3 5s-1 5-3 5-3-2-3-5 1-5 3-5zM6 15h4v2a2 2 0 0 1-4 0zM16 7c2 0 3 2 3 5s-1 5-3 5-3-2-3-5 1-5 3-5zM14 19h4v.5a2 2 0 0 1-4 0z"/>') +
        '</div>';
 
+  h += '<div class="section-title">This week</div>';
   // weight card
   var r = weightStatus();
   h += '<button class="card link" data-go="weight"><div class="row top"><div><div class="label">Weight</div>';
@@ -987,7 +1023,7 @@ function viewOverview(){
 
   ['volume','distance','steps'].forEach(function(k){
     var M = METRICS[k], st = weekStatus(k);
-    h += '<button class="card link" data-go="' + M.view + '"><div class="row top"><div><div class="label">' + esc(M.title) + ' · this week</div>' +
+    h += '<button class="card link" data-go="' + M.view + '"><div class="row top"><div><div class="label">' + esc(M.title) + '</div>' +
          '<div class="big tnum">' + esc(M.fmt(st.cur.sum)) + (k === 'steps' ? '<small>steps</small>' : '') + '</div>';
     if (st.goal) h += '<div class="small text-2 sm-gap">of ' + esc(M.fmt(st.req)) + (k === 'steps' ? ' steps' : '') + ' target</div>';
     else h += '<div class="small muted sm-gap">' + st.cur.count + (k === 'steps' ? ' day' : k === 'distance' ? ' run' : ' session') + (st.cur.count === 1 ? '' : 's') + ' logged</div>';
@@ -1000,8 +1036,9 @@ function viewOverview(){
   });
   return h;
 }
+var ARROW = '<svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 function qbtn(kind, label, path){
-  return '<button class="btn" data-act="add" data-kind="' + kind + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg>+ ' + label + '</button>';
+  return '<button class="qt" data-act="add" data-kind="' + kind + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg><span>' + label + '</span><b aria-hidden="true">+</b></button>';
 }
 function remainingText(k, st){
   var M = METRICS[k];
@@ -1183,7 +1220,7 @@ function drawWeightChart(host){
   o.push('<svg viewBox="0 0 ' + W + ' ' + H + '" height="' + H + '" role="img" aria-label="Weight chart">');
   for (var v = lo; v <= hi + 1e-9; v += step){
     var yy = Y(v).toFixed(1);
-    o.push('<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + yy + '" y2="' + yy + '" stroke="#2a2b30" stroke-width="1"/>');
+    o.push('<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + yy + '" y2="' + yy + '" stroke="var(--grid)" stroke-width="1"/>');
     o.push('<text x="' + (m.l - 7) + '" y="' + yy + '" text-anchor="end" dominant-baseline="middle">' + (step < 1 ? nf1.format(v) : f0(v)) + '</text>');
   }
   var nt = clamp(Math.floor(pw / 78), 2, 6);
@@ -1193,7 +1230,7 @@ function drawWeightChart(host){
     o.push('<text x="' + X(n).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="' + anchor + '">' + fmtDn(n, { year: (x1 - x0) > 300 && (i === 0 || i === nt-1) }) + '</text>');
   }
   if (tn >= x0 && tn <= x1 && tn < x1){
-    o.push('<line x1="' + X(tn).toFixed(1) + '" x2="' + X(tn).toFixed(1) + '" y1="' + m.t + '" y2="' + (H - m.b) + '" stroke="#3a3b41" stroke-dasharray="2 3"/>');
+    o.push('<line x1="' + X(tn).toFixed(1) + '" x2="' + X(tn).toFixed(1) + '" y1="' + m.t + '" y2="' + (H - m.b) + '" stroke="var(--stone)" stroke-opacity=".5" stroke-dasharray="2 3"/>');
     o.push('<text x="' + (X(tn) + 4).toFixed(1) + '" y="' + (m.t + 8) + '" style="font-size:10px">today</text>');
   }
   if (gl.length){
@@ -1204,13 +1241,13 @@ function drawWeightChart(host){
     }
   }
   if (pts.length > 1){
-    o.push('<polyline fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="' + pts.map(function(p){ return X(p.n).toFixed(1) + ',' + Y(p.y).toFixed(1); }).join(' ') + '"/>');
+    o.push('<polyline fill="none" stroke="var(--data)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" points="' + pts.map(function(p){ return X(p.n).toFixed(1) + ',' + Y(p.y).toFixed(1); }).join(' ') + '"/>');
   }
   var showDots = pts.length <= 45;
   pts.forEach(function(p, i){
-    if (showDots || i === pts.length - 1) o.push('<circle cx="' + X(p.n).toFixed(1) + '" cy="' + Y(p.y).toFixed(1) + '" r="' + (i === pts.length - 1 ? 4.5 : 3.5) + '" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>');
+    if (showDots || i === pts.length - 1) o.push('<circle cx="' + X(p.n).toFixed(1) + '" cy="' + Y(p.y).toFixed(1) + '" r="' + (i === pts.length - 1 ? 4.5 : 3.5) + '" fill="var(--data)" stroke="var(--surface)" stroke-width="2"/>');
   });
-  o.push('<g class="hl" style="display:none"><line class="hx" y1="' + m.t + '" y2="' + (H - m.b) + '" stroke="#8d8c86" stroke-width="1"/><circle class="hc" r="6" fill="var(--accent)" stroke="var(--text)" stroke-width="2"/></g>');
+  o.push('<g class="hl" style="display:none"><line class="hx" y1="' + m.t + '" y2="' + (H - m.b) + '" stroke="var(--stone)" stroke-width="1"/><circle class="hc" r="6" fill="var(--data)" stroke="var(--text)" stroke-width="2"/></g>');
   o.push('<rect class="hit" x="' + m.l + '" y="0" width="' + pw + '" height="' + H + '" fill="transparent"/>');
   o.push('</svg><div class="tip"></div>');
   host.innerHTML = o.join('');
@@ -1223,7 +1260,7 @@ function drawWeightChart(host){
     var hl = $('.hl', host); hl.style.display = '';
     $('.hx', hl).setAttribute('x1', cx); $('.hx', hl).setAttribute('x2', cx);
     $('.hc', hl).setAttribute('cx', cx); $('.hc', hl).setAttribute('cy', cy);
-    var html = '<div class="t">' + esc(fmtDn(p.n, { dow:true, year:true })) + '</div><div><i class="sw" style="background:var(--accent)"></i><b>' + f1(p.y) + ' kg</b></div>';
+    var html = '<div class="t">' + esc(fmtDn(p.n, { dow:true, year:true })) + '</div><div><i class="sw" style="background:var(--data)"></i><b>' + f1(p.y) + ' kg</b></div>';
     if (g && p.n >= dnum(g.startDate)){
       var lv = weightLineAt(g, p.n), df = p.y - lv;
       html += '<div><i class="ln"></i>Goal line ' + f1(lv) + ' kg <span class="muted">(' + (Math.abs(df) < 0.05 ? 'on it' : f1(Math.abs(df)) + (df > 0 ? ' above' : ' below')) + ')</span></div>';
@@ -1270,16 +1307,16 @@ function drawWeeklyChart(host, key){
   var o = ['<svg viewBox="0 0 ' + W + ' ' + H + '" height="' + H + '" role="img" aria-label="' + esc(M.title) + ' per week">'];
   for (var v = 0; v <= hi + 1e-9; v += step){
     var yy = Y(v).toFixed(1);
-    o.push('<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + yy + '" y2="' + yy + '" stroke="' + (v === 0 ? '#3a3b41' : '#2a2b30') + '" stroke-width="1"/>');
+    o.push('<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + yy + '" y2="' + yy + '" stroke="' + (v === 0 ? 'rgba(122,140,163,.4)' : 'var(--grid)') + '" stroke-width="1"/>');
     o.push('<text x="' + (m.l - 7) + '" y="' + yy + '" text-anchor="end" dominant-baseline="middle">' + esc(M.axis(v)) + '</text>');
   }
-  o.push('<rect class="hb" y="' + m.t + '" height="' + ph + '" width="' + band.toFixed(1) + '" fill="rgba(255,255,255,.05)" rx="6" style="display:none"/>');
+  o.push('<rect class="hb" y="' + m.t + '" height="' + ph + '" width="' + band.toFixed(1) + '" fill="rgba(122,140,163,.12)" rx="6" style="display:none"/>');
   data.forEach(function(d, i){
     if (d.future || d.sum <= 0) return;
     var x = X(i) - bw/2, y = Y(d.sum), hgt = Math.max(1, Y(0) - y);
     var r = Math.min(4, bw/2, hgt);
     o.push('<path d="M' + x.toFixed(1) + ',' + (y + hgt).toFixed(1) + 'V' + (y + r).toFixed(1) + 'Q' + x.toFixed(1) + ',' + y.toFixed(1) + ' ' + (x + r).toFixed(1) + ',' + y.toFixed(1) +
-           'H' + (x + bw - r).toFixed(1) + 'Q' + (x + bw).toFixed(1) + ',' + y.toFixed(1) + ' ' + (x + bw).toFixed(1) + ',' + (y + r).toFixed(1) + 'V' + (y + hgt).toFixed(1) + 'Z" fill="var(--accent)"' + (d.current ? ' fill-opacity=".6"' : '') + '/>');
+           'H' + (x + bw - r).toFixed(1) + 'Q' + (x + bw).toFixed(1) + ',' + y.toFixed(1) + ' ' + (x + bw).toFixed(1) + ',' + (y + r).toFixed(1) + 'V' + (y + hgt).toFixed(1) + 'Z" fill="var(--data)"' + (d.current ? ' fill-opacity=".6"' : '') + '/>');
     if (d.req != null && d.sum >= d.req && band >= 13) o.push('<text x="' + X(i).toFixed(1) + '" y="' + (y - 5).toFixed(1) + '" text-anchor="middle" style="fill:var(--text-2);font-size:11px;font-weight:700">✓</text>');
   });
   var rl = data.map(function(d, i){ return d.req != null ? X(i).toFixed(1) + ',' + Y(d.req).toFixed(1) : null; }).filter(Boolean);
@@ -1299,7 +1336,7 @@ function drawWeeklyChart(host, key){
     var hb = $('.hb', host); hb.style.display = ''; hb.setAttribute('x', (m.l + band * i).toFixed(1));
     var unitWord = key === 'volume' ? 'session' : key === 'distance' ? 'run' : 'day';
     var html = '<div class="t">' + (d.current ? 'This week · ' : '') + esc(weekLabel(d.w)) + '</div>';
-    html += d.future ? '<div class="muted">Upcoming week</div>' : '<div><i class="sw" style="background:var(--accent)"></i><b>' + esc(M.fmt(d.sum)) + (key === 'steps' ? ' steps' : '') + '</b> <span class="muted">· ' + d.count + ' ' + unitWord + (d.count === 1 ? '' : 's') + '</span></div>';
+    html += d.future ? '<div class="muted">Upcoming week</div>' : '<div><i class="sw" style="background:var(--data)"></i><b>' + esc(M.fmt(d.sum)) + (key === 'steps' ? ' steps' : '') + '</b> <span class="muted">· ' + d.count + ' ' + unitWord + (d.count === 1 ? '' : 's') + '</span></div>';
     if (d.req != null) html += '<div><i class="ln"></i>Target ' + esc(M.fmt(d.req)) + (d.future ? '' : ' <span class="muted">(' + Math.round(d.req ? d.sum / d.req * 100 : 100) + '%)</span>') + '</div>';
     return { x:X(i), y: Y(Math.max(d.sum, d.req || 0)), html:html };
   }, function(){ $('.hb', host).style.display = 'none'; });
@@ -2553,6 +2590,7 @@ document.addEventListener('click', function(ev){
   if (act === 'settings') return settingsSheet();
   if (act === 'hevy') return hevySheet();
   if (act === 'startwk') return startEmptyWorkout();
+  if (act === 'resumewk') return openLogger();
   if (act === 'newroutine') return openRoutineEditor(null);
   if (act === 'startroutine') return startRoutine(t.getAttribute('data-id'));
   if (act === 'routinemenu') return routineMenu(t.getAttribute('data-id'));
