@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0F2D52">
 <meta name="color-scheme" content="dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -52,8 +52,11 @@
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{overflow:hidden;overscroll-behavior:none}
+/* No zoom and no sideways scrolling: double-tap and pinch zoom are off everywhere, and every scrolling area only moves up and down */
+html,body{touch-action:manipulation;overflow-x:hidden;max-width:100%}
+#scroll,.sheet,.wk-body,.pk-list,.auth,.preview{overflow-x:hidden;touch-action:pan-y}
 /* App frame: header and tab bar stay put, only #scroll moves (the whole page never scrolls, so iOS can't shift the bars) */
-#app{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg)}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
 #scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding-bottom:16px}
 button{font:inherit;color:inherit;cursor:pointer}
 .tnum{font-variant-numeric:tabular-nums}
@@ -207,7 +210,7 @@ textarea{min-height:90px;resize:vertical;font-size:14px;font-family:ui-monospace
 .chips button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--text)}
 .calc{background:var(--surface-2);border-radius:12px;padding:11px 13px;font-size:14px;color:var(--text-2);margin-bottom:14px;line-height:1.45}
 .err{color:var(--bad-ink);font-size:14px;margin:-4px 0 12px;min-height:1px}
-.preview{max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:12px;margin-bottom:12px}
+.preview{max-height:220px;overflow-y:auto;overflow-x:hidden;border:1px solid var(--line);border-radius:12px;margin-bottom:12px}
 .preview .pi{display:flex;justify-content:space-between;gap:10px;padding:9px 12px;border-top:1px solid var(--line);font-size:14px}
 .preview .pi:first-child{border-top:0}
 
@@ -258,10 +261,11 @@ textarea{min-height:90px;resize:vertical;font-size:14px;font-family:ui-monospace
 .exc-name{display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;text-align:left;color:var(--text);font-size:16.5px;font-weight:650;min-width:0;line-height:1.25}
 .ava{width:40px;height:40px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);color:var(--text-2);font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none;letter-spacing:.02em}
 .icon-btn.sm{width:34px;height:34px;background:transparent;font-size:20px;color:var(--text-2)}
-.exc-note{border:0;background:transparent;padding:8px 0 2px;min-height:0;font-size:15px;color:var(--text-2);border-radius:0}
+.exc-note{border:0;background:transparent;padding:8px 0 2px;min-height:0;font-size:16px;color:var(--text-2);border-radius:0}
 .exc-note:focus{border:0}
 .exc-rest{background:none;border:0;padding:6px 0;color:var(--text-2);font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
 .exc-rest svg{width:16px;height:16px;color:var(--dot)}
+.exc-bw{color:var(--muted);font-size:12.5px;font-weight:600;margin:-2px 0 6px}
 .set-row{display:grid;grid-template-columns:var(--gc);align-items:center;gap:8px;padding:4px 6px;border-radius:9px;min-height:44px}
 .set-row.alt{background:var(--surface)}
 .set-row.hd{min-height:0;padding-top:4px;padding-bottom:4px;font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.05em}
@@ -501,7 +505,7 @@ var METRICS = {
 function sortList(k){
   state[k].sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : (a.ts||0) - (b.ts||0); });
 }
-function sortAll(){ KINDS.forEach(sortList); }
+function sortAll(){ KINDS.forEach(sortList); upgradeLiftVolumes(); }
 
 function weeklyMap(key){
   var M = METRICS[key], m = new Map();
@@ -1724,7 +1728,9 @@ function parseHevy(text, includeWarmups){
       ex.sets.push(set);
     }
     if (!includeWarmups && type === 'warmup') continue;
-    if (kg > 0 && reps > 0) w.volume += kg * reps;
+    var et = exName ? exType(exName) : 'wr', body = exName ? bodyFor(exName, et, w.date) : 0;
+    if (body > 0) w.volume += setVolume({ w:kg, r:reps }, et, body);
+    else if (kg > 0 && reps > 0) w.volume += kg * reps;
     w.sets++;
   }
   var out = []; map.forEach(function(w){ w.volume = Math.round(w.volume); w.exercises = w.exList; delete w.exList; delete w.exMap; out.push(w); });
@@ -1764,8 +1770,8 @@ function hevySheet(){
       prev.innerHTML = h;
       var go = $('[data-go-import]', prev);
       if (add.length + upd.length) go.addEventListener('click', function(){
-        upd.forEach(function(w){ var cur = byKey[w.key]; var i = state.lifts.indexOf(cur); state.lifts[i] = Object.assign({}, cur, { volume:w.volume, sets:w.sets, durationMin:w.durationMin, exercises:w.exercises }); });
-        add.forEach(function(w){ state.lifts.push({ id:uid(), date:w.date, name:w.name, volume:w.volume, sets:w.sets || undefined, durationMin:w.durationMin, exercises:w.exercises, source:'hevy', hevyKey:w.key, ts:Date.now() }); });
+        upd.forEach(function(w){ var cur = byKey[w.key]; var i = state.lifts.indexOf(cur); state.lifts[i] = Object.assign({}, cur, { volume:w.volume, vr:2, sets:w.sets, durationMin:w.durationMin, exercises:w.exercises }); });
+        add.forEach(function(w){ state.lifts.push({ id:uid(), date:w.date, name:w.name, volume:w.volume, vr:2, sets:w.sets || undefined, durationMin:w.durationMin, exercises:w.exercises, source:'hevy', hevyKey:w.key, ts:Date.now() }); });
         sortList('lifts'); persist(['lifts']); closeSheet(); render();
         toast('Imported ' + (add.length + upd.length) + ' workout' + (add.length + upd.length === 1 ? '' : 's'));
       });
@@ -2354,7 +2360,63 @@ function fmtSetShort(s, t){
   if (t === 'wdur') return (s.w ? nf2.format(s.w) + 'kg ' : '') + fmtSecs(s.s);
   return (t === 'wbw' ? '+' : t === 'abw' ? '−' : '') + nf2.format(s.w || 0) + 'kg × ' + (s.r || 0);
 }
-function setVolume(s, t){ return (t === 'wr' || t === 'wbw') && s.w > 0 && s.r > 0 ? s.w * s.r : 0; }
+/* Volume. Weighted sets: weight × reps. Moves where you lift your own body (pull-ups, chin-ups, dips, push-ups,
+   muscle-ups, inverted rows, squats, lunges, step-ups) also count your body weight: body × reps, (body + added) × reps
+   when weighted, (body − assistance) × reps when assisted. Body weight = your latest weigh-in on or before that day. */
+var BODY_MOVES = /push[ -]?ups?\b|\bdips?\b|pull[ -]?ups?\b|chin[ -]?ups?\b|muscle[ -]?ups?\b|inverted rows?\b|squats?\b|lunges?\b|step[ -]?ups?\b/i;
+function liftsBody(n, t){ return (t === 'bw' || t === 'wbw' || t === 'abw') && BODY_MOVES.test(String(n || '')); }
+function bodyKgOn(date){
+  var best = null, first = null;
+  state.weights.forEach(function(e){
+    if (!(e.kg > 0)) return;
+    if (!first || e.date < first.date) first = e;
+    if (e.date <= date && (!best || e.date >= best.date)) best = e;
+  });
+  return (best || first || { kg:0 }).kg;
+}
+function bodyFor(n, t, date){ return liftsBody(n, t) ? bodyKgOn(date || todayStr()) : 0; }
+function setVolume(s, t, body){
+  var r = s.r > 0 ? s.r : 0, w = s.w > 0 ? s.w : 0; body = body > 0 ? body : 0;
+  if (!r) return 0;
+  if (t === 'wr') return w * r;
+  if (t === 'wbw') return (body + w) * r;
+  if (t === 'bw') return body * r;
+  if (t === 'abw') return body ? Math.max(0, body - w) * r : 0;
+  return 0;
+}
+function workoutVolume(exercises, date, skipWarmups){
+  var v = 0;
+  (exercises || []).forEach(function(x){
+    var t = exType(x.n), body = bodyFor(x.n, t, date);
+    (x.sets || []).forEach(function(s){ if (!(skipWarmups && s.t === 'w')) v += setVolume(s, t, body); });
+  });
+  return v;
+}
+/* Workouts saved before body weight counted: add it in once, keeping everything else exactly as it was saved
+   (in-app workouts never counted bodyweight sets; Hevy imports counted weight × reps, with or without warm-ups). */
+function upgradeLiftVolumes(){
+  exIndexCache = null;
+  var n = 0;
+  state.lifts.forEach(function(l){
+    if (l.vr >= 2) return;
+    l.vr = 2;
+    if (!Array.isArray(l.exercises) || !l.exercises.length) return;
+    var stored = +l.volume || 0, oldApp = 0, oldAll = 0, oldNoW = 0, addApp = 0, addAll = 0, addNoW = 0;
+    l.exercises.forEach(function(x){
+      var t = exType(x.n), body = bodyFor(x.n, t, l.date);
+      (x.sets || []).forEach(function(s){
+        var a = (t === 'wr' || t === 'wbw') && s.w > 0 && s.r > 0 ? s.w * s.r : 0, h = s.w > 0 && s.r > 0 ? s.w * s.r : 0, warm = s.t === 'w';
+        oldApp += a; oldAll += h; if (!warm) oldNoW += h;
+        if (body > 0){ var nv = setVolume(s, t, body); addApp += nv - a; addAll += nv - h; if (!warm) addNoW += nv - h; }
+      });
+    });
+    function same(x){ return Math.abs(Math.round(x) - stored) <= 1 + stored * 0.002; }
+    var order = l.source === 'hevy' ? [[oldAll, addAll], [oldNoW, addNoW], [oldApp, addApp]] : [[oldApp, addApp], [oldAll, addAll], [oldNoW, addNoW]];
+    for (var i = 0; i < order.length; i++) if (same(order[i][0])){ if (order[i][1]){ l.volume = Math.max(0, Math.round(stored + order[i][1])); n++; } break; }
+  });
+  exIndexCache = null;
+  return n;
+}
 function e1rm(w, r){ return w > 0 && r > 0 ? (r === 1 ? w : w * (1 + r / 30)) : 0; }
 function setLabelFn(){ var n = 0; return function(s){ return s.t === 'w' ? 'W' : s.t === 'd' ? 'D' : s.t === 'f' ? 'F' : String(++n); }; }
 
@@ -2517,6 +2579,7 @@ function exCardHtml(x, i){
     '<button class="icon-btn sm" data-wk="exmenu" aria-label="Exercise options">⋯</button></div>';
   if (!R) h += '<input class="exc-note" data-f="note" autocomplete="off" placeholder="Add notes here…" value="' + esc(x.note || '') + '">';
   h += '<button class="exc-rest" data-wk="rest">' + ICON.timer + 'Rest timer: ' + restLabel(x.rest) + '</button>';
+  if (!R && liftsBody(x.n, t)){ var bk = bodyKgOn(wkDay()); h += '<div class="exc-bw">' + (bk ? 'Volume counts your body weight (' + nf1.format(bk) + ' kg)' : 'Log a weigh-in and your body weight counts towards volume') + '</div>'; }
   h += '<div class="set-row hd" style="--gc:' + gc + '"><div>SET</div>' + (R ? '' : '<div>PREVIOUS</div>') + cols.map(function(c){ return '<div>' + colLabel(c, t) + '</div>'; }).join('') + (R ? '' : '<div aria-label="Done">' + ICON.check.replace('stroke-width="3"', 'stroke-width="2.4" width="14" height="14"') + '</div>') + '</div>';
   x.sets.forEach(function(s, si){
     var p = prev[si], lab = label(s);
@@ -2538,9 +2601,11 @@ function renderCard(ei){
   var tmp = document.createElement('div'); tmp.innerHTML = exCardHtml(WK.exercises[ei], ei);
   card.replaceWith(tmp.firstChild);
 }
+function wkDay(){ return WK && WK.mode === 'edit' && isDate(WK.date) ? WK.date : todayStr(); }
 function wkTotals(){
   var vol = 0, sets = 0;
-  WK.exercises.forEach(function(x){ var t = exType(x.n); x.sets.forEach(function(s){ if (!s.done) return; sets++; vol += setVolume(cleanSet(s, t), t); }); });
+  var day = wkDay();
+  WK.exercises.forEach(function(x){ var t = exType(x.n), body = bodyFor(x.n, t, day); x.sets.forEach(function(s){ if (!s.done) return; sets++; vol += setVolume(cleanSet(s, t), t, body); }); });
   return { vol:vol, sets:sets };
 }
 function updateWkStats(){
@@ -2811,15 +2876,15 @@ function createExerciseSheet(prefill){
 function exerciseRecords(name, excludeId){
   var t = exType(name), hist = exHistory(name, excludeId), r = { t:t, sessions:hist.length, heaviest:0, best1rm:0, bestSet:0, bestSession:0, mostReps:0, longest:0, farthest:0 };
   hist.forEach(function(h){
-    var sv = 0;
+    var sv = 0, body = bodyFor(name, t, h.lift.date);
     (h.ex.sets || []).forEach(function(s){
       r.heaviest = Math.max(r.heaviest, s.w || 0);
       r.best1rm = Math.max(r.best1rm, e1rm(s.w || 0, s.r || 0));
-      r.bestSet = Math.max(r.bestSet, setVolume(s, t));
+      r.bestSet = Math.max(r.bestSet, setVolume(s, t, body));
       r.mostReps = Math.max(r.mostReps, s.r || 0);
       r.longest = Math.max(r.longest, s.s || 0);
       r.farthest = Math.max(r.farthest, s.d || 0);
-      sv += setVolume(s, t);
+      sv += setVolume(s, t, body);
     });
     r.bestSession = Math.max(r.bestSession, sv);
   });
@@ -2833,7 +2898,7 @@ function exerciseInfoSheet(name){
     if (t === 'wr' || t === 'wbw'){
       h += stat('Heaviest weight', nf2.format(rec.heaviest) + ' kg') + stat('Best est. 1RM', nf1.format(rec.best1rm) + ' kg') +
            stat('Best set volume', f0(rec.bestSet) + ' kg') + stat('Best session volume', f0(rec.bestSession) + ' kg');
-    } else if (t === 'bw' || t === 'abw') h += stat('Most reps in a set', String(rec.mostReps));
+    } else if (t === 'bw' || t === 'abw') h += stat('Most reps in a set', String(rec.mostReps)) + (rec.bestSet ? stat('Best set volume', f0(rec.bestSet) + ' kg') + stat('Best session volume', f0(rec.bestSession) + ' kg') : '');
     else if (t === 'dd') h += stat('Longest distance', nf2.format(rec.farthest) + ' km') + stat('Longest time', fmtSecs(rec.longest));
     else h += stat('Longest time', fmtSecs(rec.longest)) + (t === 'wdur' ? stat('Heaviest weight', nf2.format(rec.heaviest) + ' kg') : '');
     h += stat('Sessions logged', String(rec.sessions)) + '</div>';
@@ -2872,9 +2937,9 @@ function finishWorkout(){
 function buildWorkout(){
   var exercises = [], volume = 0, sets = 0, prs = [];
   WK.exercises.forEach(function(x){
-    var t = exType(x.n), done = x.sets.filter(function(s){ return s.done; }).map(function(s){ return cleanSet(s, t); });
+    var t = exType(x.n), body = bodyFor(x.n, t, wkDay()), done = x.sets.filter(function(s){ return s.done; }).map(function(s){ return cleanSet(s, t); });
     if (!done.length) return;
-    done.forEach(function(s){ volume += setVolume(s, t); sets++; });
+    done.forEach(function(s){ volume += setVolume(s, t, body); sets++; });
     var ex = { n:x.n, sets:done }; if (x.note && x.note.trim()) ex.note = x.note.trim();
     exercises.push(ex);
     if (t === 'wr' || t === 'wbw'){
@@ -2909,7 +2974,7 @@ function saveWorkoutSheet(){
       var old = E ? findEntry('lifts', WK.editId) : null;
       var entry = Object.assign({}, old || {}, {
         id: E ? WK.editId : uid(), date:f.date.value, name:f.title.value.trim() || workoutTitleFor(WK.startedAt),
-        volume:w.volume, sets:w.sets, durationMin: dur || undefined, notes: f.desc.value.trim() || undefined,
+        volume:Math.round(workoutVolume(w.exercises, f.date.value)), vr:2, sets:w.sets, durationMin: dur || undefined, notes: f.desc.value.trim() || undefined,
         exercises:w.exercises, startedAt:WK.startedAt || undefined, source: old && old.source ? old.source : 'logger', ts: old ? old.ts : Date.now()
       });
       var prs = w.prs.length;
@@ -2996,6 +3061,9 @@ function resetPageShift(){ if (!editing() && (window.scrollY || document.documen
 document.addEventListener('focusout', function(){ setTimeout(resetPageShift, 60); });
 window.addEventListener('scroll', resetPageShift, { passive:true });
 if (window.visualViewport) window.visualViewport.addEventListener('resize', function(){ setTimeout(resetPageShift, 60); });
+/* No zooming: iOS can ignore user-scalable=no, so pinch gestures and two-finger moves are cancelled here too (double-tap zoom is off via touch-action) */
+['gesturestart', 'gesturechange', 'gestureend'].forEach(function(n){ document.addEventListener(n, function(e){ e.preventDefault(); }, { passive:false }); });
+document.addEventListener('touchmove', function(e){ if ((e.touches && e.touches.length > 1) || (e.scale && e.scale !== 1)) e.preventDefault(); }, { passive:false });
 function go(view){
   if (VIEWS.indexOf(view) < 0) view = 'overview';
   var changed = ui.view !== view;
