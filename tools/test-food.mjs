@@ -1,4 +1,5 @@
-// Food from Fuel8: sync key, Shortcut → food-sync (simulated with the real parser), Today card, Food page, chart, targets.
+// Food from Fuel8: hidden by default (FEATURES.food = false). Part 0 checks nothing food-related shows or loads;
+// the rest switches it on (window.HH_FEATURES) and tests sync key, Shortcut → food-sync (real parser), Today card, Food page, chart, targets.
 // Needs: python3 tools/build.py
 import { chromium } from 'playwright-core';
 import http from 'http'; import fs from 'fs'; import path from 'path';
@@ -67,7 +68,7 @@ const MOCK = `window.supabase = { createClient(url, key, opts) {
       async resetPasswordForEmail() { return { data: {}, error: null }; },
       async updateUser() { return { data: {}, error: null }; }
     },
-    from(t) { return builder(t); }
+    from(t) { if (t !== 'health_data') window.__foodCalls = (window.__foodCalls || 0) + 1; return builder(t); }
   };
 } };`;
 
@@ -78,10 +79,34 @@ const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','
 const shortcutDate = () => { const x = new Date(); return x.getDate() + ' ' + MON[x.getMonth()] + ' ' + x.getFullYear() + ' at ' + pad(x.getHours()) + ':' + pad(x.getMinutes()); };
 
 const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+const route = async c => {
+  await c.route('**/config.js', r => r.fulfill({ contentType: 'text/javascript', body: "window.HH_CONFIG = { supabaseUrl: 'https://tldbofbnqdloddgivktk.supabase.co', supabaseKey: 'pk' };" }));
+  await c.route('**/vendor/supabase.js', r => r.fulfill({ contentType: 'text/javascript', body: MOCK }));
+  await c.route('**/sw.js', r => r.fulfill({ status: 404, body: '' }));
+};
+
+// 0. default build: Food is switched off and invisible
+{
+  const c0 = await browser.newContext({ viewport: { width: 393, height: 852 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true }); await route(c0);
+  const p0 = await c0.newPage(); const e0 = []; p0.on('pageerror', e => e0.push(e.message));
+  await p0.goto('http://localhost:8773/HealthHub/'); await p0.waitForSelector('#auth form');
+  await p0.click('#auth [data-mode=signup]'); await p0.fill('#auth input[name=name]', 'Stephen'); await p0.fill('#auth input[name=email]', 's@example.com'); await p0.fill('#auth input[name=password]', 'secret123');
+  await p0.click('#auth button[type=submit]'); await p0.waitForSelector('#auth', { state: 'detached' }); await p0.waitForTimeout(600);
+  ok('off: 5 visible tabs, no Food', (await p0.$$eval('.tab', t => t.filter(x => x.offsetParent !== null).map(x => x.getAttribute('data-go')).join(','))) === 'overview,weight,lifting,running,steps');
+  ok('off: no food card or prompt on Today', !/Fuel8|Food today/.test(await p0.textContent('main')));
+  await p0.evaluate(() => { location.hash = 'food'; }); await p0.waitForTimeout(200);
+  ok('off: #food link goes nowhere', (await p0.textContent('#title')).startsWith('Welcome'));
+  await p0.click('[data-act="settings"]'); await p0.waitForTimeout(300);
+  ok('off: no Food section in Settings', !/Daily targets|Fuel8/.test(await p0.textContent('.sheet')));
+  ok('off: no food or sync-key requests', !(await p0.evaluate(() => window.__foodCalls)));
+  ok('off: no page errors', e0.length === 0, e0);
+  await p0.screenshot({ path: shots + '/food-off.png' });
+  await c0.close();
+}
+
 const ctx = await browser.newContext({ viewport: { width: 393, height: 852 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
-await ctx.route('**/config.js', r => r.fulfill({ contentType: 'text/javascript', body: "window.HH_CONFIG = { supabaseUrl: 'https://tldbofbnqdloddgivktk.supabase.co', supabaseKey: 'pk' };" }));
-await ctx.route('**/vendor/supabase.js', r => r.fulfill({ contentType: 'text/javascript', body: MOCK }));
-await ctx.route('**/sw.js', r => r.fulfill({ status: 404, body: '' }));
+await route(ctx);
+await ctx.addInitScript(() => { window.HH_FEATURES = { food: true }; });     // switch the hidden feature on for the rest
 await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: 'http://localhost:8773' });
 const errors = []; const page = await ctx.newPage();
 page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error' && !/404/.test(m.text())) errors.push(m.text()); });
