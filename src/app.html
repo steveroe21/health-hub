@@ -357,6 +357,22 @@ textarea.plain{font-family:var(--font);font-size:16px;min-height:72px}
 .pv-nav{position:absolute;top:50%;margin-top:-26px;width:44px;height:52px;border:0;border-radius:12px;background:rgba(255,255,255,.12);color:#fff;font-size:30px;line-height:1;padding:0 0 4px;z-index:2}
 .pv-nav.prev{left:max(10px, env(safe-area-inset-left))} .pv-nav.next{right:max(10px, env(safe-area-inset-right))}
 .pv-bot{flex:none;padding:12px 16px calc(env(safe-area-inset-bottom) + 16px);text-align:center;color:var(--muted);font-size:13.5px}
+/* ---------- food ---------- */
+.prog.over > i{background:var(--warn)}
+.card.food-today{margin-top:10px}
+.keybox{font-size:14.5px;margin:0 0 8px}
+.macros{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.macro{background:var(--surface-2);border-radius:12px;padding:9px 11px;min-width:0}
+.macro .k{font-size:12px;color:var(--muted);font-weight:600}
+.macro .v{font-size:16.5px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.macro .s{font-size:11.5px;color:var(--muted);margin-top:1px}
+.step-h{font-family:var(--display);font-stretch:112%;font-weight:800;font-size:15.5px;letter-spacing:-.01em;margin:20px 0 8px}
+.steps{margin:0 0 12px;padding-left:22px;color:var(--text-2);font-size:14.5px;line-height:1.5}
+.steps li{margin-bottom:8px}
+.steps ul{margin:6px 0 0;padding-left:18px}
+.steps ul li{margin-bottom:3px}
+.steps b,.sheet p b{color:var(--text);font-weight:650}
+.url{display:block;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;line-height:1.45;background:var(--surface-2);color:var(--text);border-radius:10px;padding:9px 11px;margin:6px 0 8px;overflow-wrap:anywhere;user-select:all;-webkit-user-select:all}
 </style>
 </head>
 <body>
@@ -379,6 +395,7 @@ textarea.plain{font-family:var(--font);font-size:16px;min-height:72px}
 <nav class="tabbar" id="tabbar" aria-label="Sections">
   <button class="tab" data-go="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Today</button>
   <button class="tab" data-go="weight"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 9a5 5 0 0 1 8 0l-2.5 3"/></svg>Weight</button>
+  <button class="tab" data-go="food"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v6a2 2 0 0 0 4 0V3M8 11v10M17 21V3c-2 1.2-3.5 3.6-3.5 7v3H17"/></svg>Food</button>
   <button class="tab" data-go="lifting"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>Lifting</button>
   <button class="tab" data-go="running"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="15.5" cy="4.5" r="1.8"/><path d="M8 21l3-6 3 2v5M6 12l3-4 4 1 3 4 3 1M11 15l1.5-5"/></svg>Running</button>
   <button class="tab" data-go="steps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3c2 0 3 2 3 5s-1 5-3 5-3-2-3-5 1-5 3-5zM6 15h4v2a2 2 0 0 1-4 0zM16 7c2 0 3 2 3 5s-1 5-3 5-3-2-3-5 1-5 3-5zM14 19h4v.5a2 2 0 0 1-4 0z"/></svg>Steps</button>
@@ -401,9 +418,9 @@ var APP_VERSION = '1.1';
    State
    ========================================================= */
 function defaultState(){
-  return { v:1, weights:[], lifts:[], runs:[], steps:[], checkins:[],
+  return { v:1, weights:[], lifts:[], runs:[], steps:[], checkins:[], food:[],
     goals:{ weight:null, volume:null, distance:null, steps:null },
-    prefs:{ weekStart:1, restDefault:90, restByEx:{} },
+    prefs:{ weekStart:1, restDefault:90, restByEx:{}, kcalTarget:null, proteinTarget:null },
     routines:[], customExercises:[] };
 }
 var state = defaultState();
@@ -640,6 +657,8 @@ function normalise(d){
   if (d.prefs) s.prefs = Object.assign(s.prefs, d.prefs);
   if (Array.isArray(d.routines)) s.routines = d.routines.filter(function(r){ return r && r.name && Array.isArray(r.exercises); });
   if (Array.isArray(d.customExercises)) s.customExercises = d.customExercises.filter(function(c){ return c && c.n; });
+  if (Array.isArray(d.food)) s.food = d.food.filter(function(e){ return e && isDate(e.date); }).map(function(e){ return Object.assign({}, e); })
+    .sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
   sortAllIn(s);
   return s;
 }
@@ -787,6 +806,7 @@ async function pullRemote(){
   var s = normalise(clone(state));
   (res.data || []).forEach(function(r){ if (!Acc.dirty[r.key]) applyRow(r.key, r.data, s); });
   sortAllIn(s); state = s; saveCache();
+  try { await pullFood(); } catch(e){}
   if (!Object.keys(Acc.dirty).length) setSync('ok');
   return true;
 }
@@ -842,6 +862,7 @@ async function startUser(user, fresh){
   render();
   wkRestore();
   offerLegacyData();
+  loadFoodKey().then(function(){ if (ui.view === 'food' || ui.view === 'overview') renderSoon(); });
 }
 
 /* entries logged on this phone before accounts existed: offer them to whoever logs in first */
@@ -970,7 +991,7 @@ async function logout(force){
   var clean = !Object.keys(Acc.dirty).length;
   try { if (clean) localStorage.removeItem(cacheKey()); } catch(e){}
   wkDrop();
-  Acc.user = null; Acc.q = {}; Acc.inflight = {}; Acc.dirty = {}; PH.urls = {}; PH.waiting = {};
+  Acc.user = null; Acc.q = {}; Acc.inflight = {}; Acc.dirty = {}; PH.urls = {}; PH.waiting = {}; Food.key = null; Food.keyLoaded = false;
   Store.mode = 'loading'; Store.name = '';
   state = defaultState(); ui.ranges = {}; ui.showAll = {};
   try { await sb.auth.signOut({ scope:'local' }); } catch(e){}
@@ -1000,8 +1021,8 @@ function persist(kinds){
 /* =========================================================
    Rendering
    ========================================================= */
-var TITLES = { overview:'Today', weight:'Weight', lifting:'Lifting', running:'Running', steps:'Steps' };
-var VIEWS = ['overview','weight','lifting','running','steps'];
+var TITLES = { overview:'Today', weight:'Weight', food:'Food', lifting:'Lifting', running:'Running', steps:'Steps' };
+var VIEWS = ['overview','weight','food','lifting','running','steps'];
 var renderQueued = false;
 function renderSoon(){ if (renderQueued) return; renderQueued = true; requestAnimationFrame(function(){ renderQueued = false; render(); }); }
 
@@ -1015,6 +1036,7 @@ function render(){
   if (Store.mode === 'memory') html += '<div class="banner">This browser is blocking storage, so nothing you log will be kept.</div>';
   if (v === 'overview') html += viewOverview();
   else if (v === 'weight') html += viewWeight();
+  else if (v === 'food') html += viewFood();
   else html += viewMetric(v === 'lifting' ? 'volume' : v === 'running' ? 'distance' : 'steps');
   main.innerHTML = html;
   mountCharts();
@@ -1059,6 +1081,7 @@ function viewOverview(){
        qbtn('steps', 'Steps', '<path d="M8 3c2 0 3 2 3 5s-1 5-3 5-3-2-3-5 1-5 3-5zM6 15h4v2a2 2 0 0 1-4 0zM16 7c2 0 3 2 3 5s-1 5-3 5-3-2-3-5 1-5 3-5zM14 19h4v.5a2 2 0 0 1-4 0z"/>') +
        '</div>';
 
+  h += foodTodayHtml();
   h += checkinTodayHtml();
   h += '<div class="section-title">This week</div>';
   // weight card
@@ -1237,6 +1260,7 @@ function niceStep(range, count){
 }
 function mountCharts(){
   var w = $('#chart-weight'); if (w) drawWeightChart(w);
+  var fc = $('#chart-food'); if (fc) drawFoodChart(fc);
   ['volume','distance','steps'].forEach(function(k){ var el = $('#chart-' + k); if (el) drawWeeklyChart(el, k); });
 }
 
@@ -2150,11 +2174,360 @@ function openViewer(photos, idx, label){
 }
 
 /* =========================================================
+   Food: daily totals from Fuel8.
+   Fuel8 writes confirmed food to Apple Health; an iPhone Shortcut reads today's totals
+   and posts them to the food-sync Edge Function with the person's sync key.
+   The app only reads them (food_days) — edits happen in Fuel8.
+   ========================================================= */
+var Food = { key:null, keyLoaded:false, pulledAt:0 };
+var FORK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v6a2 2 0 0 0 4 0V3M8 11v10M17 21V3c-2 1.2-3.5 3.6-3.5 7v3H17"/></svg>';
+function canFood(){ return Store.mode === 'account' && !!Acc.user && !!sb; }
+function foodUrl(){ return String(CFG.supabaseUrl || '').replace(/\/+$/, '') + '/functions/v1/food-sync'; }
+function foodFor(date){ for (var i = state.food.length - 1; i >= 0; i--) if (state.food[i].date === date) return state.food[i]; return null; }
+function foodLogged(e){ return !!(e && e.kcal > 0); }
+function foodTargets(){ return { kcal: +state.prefs.kcalTarget > 0 ? +state.prefs.kcalTarget : null, protein: +state.prefs.proteinTarget > 0 ? +state.prefs.proteinTarget : null }; }
+function foodIn(fromN, toN){ return state.food.filter(function(e){ var n = dnum(e.date); return n >= fromN && n <= toN && foodLogged(e); }); }
+function avgOf(list, k){ var v = list.filter(function(e){ return e[k] != null; }); return v.length ? v.reduce(function(a, e){ return a + (+e[k]); }, 0) / v.length : null; }
+function localDay(ms){ var d = new Date(ms); return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+function whenText(iso){ var ms = Date.parse(iso); return isFinite(ms) ? relDay(localDay(ms)) + ' at ' + timeStr(ms) : ''; }
+function lastFoodSync(){
+  var best = Food.key && Food.key.last_used_at ? Date.parse(Food.key.last_used_at) || 0 : 0;
+  state.food.forEach(function(e){ var t = e.at ? Date.parse(e.at) || 0 : 0; if (t > best) best = t; });
+  return best ? new Date(best).toISOString() : null;
+}
+
+// the numbers behind the Food page: last 7 full days, and maintenance from 4 weeks of food + the weight trend
+function foodStats(){
+  var tn = tnum(), t = foodTargets(), wk = foodIn(tn - 7, tn - 1);
+  var r = { week:wk, avgKcal:avgOf(wk, 'kcal'), avgProtein:avgOf(wk, 'protein') };
+  if (t.kcal) r.within = wk.filter(function(e){ return e.kcal <= t.kcal; }).length;
+  if (t.protein) r.proteinHit = wk.filter(function(e){ return e.protein != null && e.protein >= t.protein; }).length;
+  var m = foodIn(tn - 28, tn - 1), tr = weightTrend();
+  r.mDays = m.length;
+  if (tr && m.length >= 14){
+    r.mAvg = avgOf(m, 'kcal');
+    var est = Math.round((r.mAvg - tr.slope * 7700) / 10) * 10;     // ~7,700 kcal per kg of body weight
+    if (est >= 1000 && est <= 6000) r.maintenance = est; else r.jumpy = true;
+  }
+  r.high = state.food.some(function(e){ return dnum(e.date) >= tn - 14 && e.kcal > 5000; });
+  return r;
+}
+
+async function pullFood(){
+  if (!canFood()) return false;
+  var uid = Acc.user.id, res;
+  try { res = await sb.from('food_days').select('date,kcal,protein_g,carbs_g,fat_g,updated_at').order('date', { ascending:false }).limit(800); }
+  catch(e){ return false; }
+  if (!Acc.user || Acc.user.id !== uid || !res || res.error || !Array.isArray(res.data)) return false;
+  var num = function(v){ return v == null || v === '' || !isFinite(+v) ? null : +v; }, list = [];
+  res.data.forEach(function(r){
+    var d = r && String(r.date || '').slice(0, 10);
+    if (isDate(d)) list.push({ date:d, kcal:num(r.kcal), protein:num(r.protein_g), carbs:num(r.carbs_g), fat:num(r.fat_g), at:r.updated_at || null });
+  });
+  list.sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+  state.food = list; Food.pulledAt = Date.now(); saveCache();
+  return true;
+}
+async function loadFoodKey(){
+  if (!canFood()) return;
+  var uid = Acc.user.id;
+  try {
+    var r = await sb.from('sync_keys').select('hint,created_at,last_used_at').limit(1);
+    if (Acc.user && Acc.user.id === uid && r && !r.error && Array.isArray(r.data)){ Food.key = r.data[0] || null; Food.keyLoaded = true; }
+  } catch(e){}
+}
+function b64url(bytes){ var s = ''; for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+async function sha256hex(text){
+  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.prototype.map.call(new Uint8Array(buf), function(b){ return ('0' + b.toString(16)).slice(-2); }).join('');
+}
+// a new random key; only its hash goes to the server, so it can be shown just once
+async function makeFoodKey(){
+  var b = new Uint8Array(32); crypto.getRandomValues(b);
+  var key = 'hh_' + b64url(b), hash = await sha256hex(key), now = new Date().toISOString();
+  var r = await sb.from('sync_keys').upsert({ user_id:Acc.user.id, key_hash:hash, hint:key.slice(-4), created_at:now, last_used_at:null }, { onConflict:'user_id' });
+  if (r && r.error) throw r.error;
+  Food.key = { hint:key.slice(-4), created_at:now, last_used_at:null }; Food.keyLoaded = true;
+  return key;
+}
+async function removeFoodKey(){
+  var r = await sb.from('sync_keys').delete().eq('user_id', Acc.user.id);
+  if (r && r.error) throw r.error;
+  Food.key = null;
+}
+async function checkFoodNow(btn){
+  if (!canFood()) return;
+  if (offlineNow()) return toast('You’re offline — connect and try again');
+  if (btn){ btn.disabled = true; btn.style.opacity = '.6'; }
+  var before = JSON.stringify(foodFor(todayStr()) || null);
+  var ok = await pullFood(); await loadFoodKey();
+  if (btn){ btn.disabled = false; btn.style.opacity = ''; }
+  render();
+  if (!ok) return toast('Couldn’t reach Health Hub — try again');
+  var e = foodFor(todayStr());
+  if (foodLogged(e)) toast((JSON.stringify(e) !== before ? 'Updated: ' : 'Today: ') + f0(e.kcal) + ' kcal' + (e.protein != null ? ' · ' + f0(e.protein) + ' g protein' : ''));
+  else toast(Food.key ? 'Nothing from Fuel8 for today yet' : 'Connect Fuel8 first');
+}
+
+/* ---------- pieces ---------- */
+function meter(frac, label){
+  return '<div class="prog' + (frac > 1 ? ' over' : '') + '" role="img" aria-label="' + esc(label) + '"><i style="width:' + clamp(frac*100, 0, 100).toFixed(1) + '%"></i></div>';
+}
+function macroBits(e, long){
+  var out = [];
+  if (e && e.protein != null) out.push((long ? 'Protein ' : 'P ') + f0(e.protein) + ' g');
+  if (e && e.carbs != null) out.push((long ? 'Carbs ' : 'C ') + f0(e.carbs) + ' g');
+  if (e && e.fat != null) out.push((long ? 'Fat ' : 'F ') + f0(e.fat) + ' g');
+  return out;
+}
+function kcalLine(e, t){
+  if (!t.kcal) return 'No daily calorie target set';
+  if (e.kcal <= t.kcal) return f0(t.kcal - e.kcal) + ' kcal left of ' + f0(t.kcal);
+  return f0(e.kcal - t.kcal) + ' kcal over your ' + f0(t.kcal) + ' target';
+}
+function foodChip(e, t){
+  if (!foodLogged(e)) return '<span class="chip">No food yet</span>';
+  if (t.kcal && e.kcal > t.kcal) return statusChip('warn', 'Over target');
+  if (t.protein && e.protein != null && e.protein >= t.protein) return statusChip('good', 'Protein hit');
+  return '<span class="chip">Fuel8</span>';
+}
+function macroTiles(e, t){
+  function tile(k, v, target){
+    return '<div class="macro"><div class="k">' + k + '</div><div class="v">' + (v != null ? f0(v) + ' g' : '—') + '</div>' +
+      (target ? '<div class="s">of ' + f0(target) + ' g</div>' : '') + '</div>';
+  }
+  return '<div class="macros">' + tile('Protein', e && e.protein, t.protein) + tile('Carbs', e && e.carbs) + tile('Fat', e && e.fat) + '</div>';
+}
+
+/* ---------- Today card ---------- */
+function foodTodayHtml(){
+  if (!canFood() && !state.food.length) return '';
+  var e = foodFor(todayStr()), t = foodTargets();
+  if (!state.food.length && !Food.key){
+    if (!Food.keyLoaded) return '';
+    return '<button class="card link ci-cta food-today" data-go="food"><span class="ci-ic">' + FORK + '</span><span class="ci-t"><span class="t">Track food from Fuel8</span>' +
+      '<span class="s">Connect once and your calories and protein show up here every day.</span></span>' + ARROW + '</button>';
+  }
+  var h = '<button class="card link food-today" data-go="food"><div class="row top"><div><div class="label">Food today</div>';
+  if (foodLogged(e)){
+    h += '<div class="big tnum">' + f0(e.kcal) + '<small>kcal</small></div><div class="small text-2 sm-gap">' + esc(kcalLine(e, t)) + '</div>';
+  } else h += '<div class="med muted" style="margin-top:6px">Nothing from Fuel8 yet</div>';
+  h += '</div>' + foodChip(e, t) + '</div>';
+  if (foodLogged(e) && t.kcal) h += meter(e.kcal / t.kcal, Math.round(e.kcal / t.kcal * 100) + '% of today’s calorie target');
+  var bits = macroBits(e, true);
+  if (bits.length && t.protein && e.protein != null) bits[0] += ' of ' + f0(t.protein);
+  var last = lastFoodSync();
+  h += '<div class="small muted md-gap">' + esc(bits.length ? bits.join(' · ') : (last ? 'Last sync ' + whenText(last).toLowerCase() : 'Waiting for the first sync')) + '</div>';
+  return h + '</button>';
+}
+
+/* ---------- Food page ---------- */
+function foodRange(){ return ui.ranges.food || '4w'; }
+function viewFood(){
+  if (!canFood() && !state.food.length){
+    return '<div class="card"><div class="label">Food</div><p class="small text-2" style="line-height:1.5;margin:10px 0 0">Food comes from Fuel8 through your Health Hub account. Open Health Hub from your iPhone’s Home Screen and log in to connect it.</p></div>';
+  }
+  var today = todayStr(), e = foodFor(today), t = foodTargets(), st = foodStats(), h = '';
+  if (st.high) h += '<div class="banner">Some days look very high (over 5,000 kcal). If the Health app shows Dietary Energy in kilojoules, switch it to kcal, or add a field <b>unit</b> = <b>kJ</b> to the Shortcut.</div>';
+
+  h += '<div class="card"><div class="row top"><div><div class="label">Today · ' + esc(fmtD(today, { dow:true })) + '</div>';
+  if (foodLogged(e)) h += '<div class="big tnum">' + f0(e.kcal) + '<small>kcal</small></div><div class="small text-2 sm-gap">' + esc(kcalLine(e, t)) + '</div>';
+  else h += '<div class="med muted" style="margin-top:6px">Nothing from Fuel8 yet</div>';
+  h += '</div>' + foodChip(e, t) + '</div>';
+  if (foodLogged(e) && t.kcal) h += meter(e.kcal / t.kcal, Math.round(e.kcal / t.kcal * 100) + '% of today’s calorie target');
+  h += macroTiles(e, t);
+  if (t.kcal || t.protein){
+    h += '<div class="small text-2 md-gap">Daily targets: <b>' + [t.kcal ? f0(t.kcal) + ' kcal' : '', t.protein ? f0(t.protein) + ' g protein' : ''].filter(Boolean).join(' · ') + '</b>' +
+         ' <button class="btn ghost" data-act="foodtargets">Edit</button></div>';
+  } else h += '<div class="md-gap"><button class="btn small" data-act="foodtargets">Set daily targets</button></div>';
+  h += '</div>';
+
+  h += '<div class="card"><div class="label">Daily calories</div>' + rangeSeg('food', [['2w','2W'],['4w','4W'],['12w','12W']], foodRange()) +
+       '<div class="chart" id="chart-food"></div><div class="legend"><span><i class="sw"></i>Calories</span>' + (t.kcal ? '<span><i class="ln"></i>Target</span>' : '') + '</div></div>';
+
+  var n = st.week.length;
+  h += '<div class="stats">';
+  h += stat('7-day average', st.avgKcal != null ? f0(st.avgKcal) + ' kcal' : '—', n ? n + ' of the last 7 days logged' : 'no days logged yet');
+  h += stat('Average protein', st.avgProtein != null ? f0(st.avgProtein) + ' g' : '—', t.protein && st.avgProtein != null ? st.proteinHit + ' of ' + n + ' days hit ' + f0(t.protein) + ' g' : 'last 7 days');
+  if (t.kcal) h += stat('Within target', n ? st.within + ' of ' + n + ' days' : '—', 'at or under ' + f0(t.kcal) + ' kcal');
+  h += stat('Est. maintenance', st.maintenance ? '≈ ' + f0(st.maintenance) + ' kcal' : '—',
+    st.maintenance ? 'you’re eating about ' + f0(Math.abs(Math.round((st.maintenance - st.mAvg) / 10) * 10)) + (st.mAvg <= st.maintenance ? ' under' : ' over') + ' it'
+      : st.jumpy ? 'weight trend too jumpy to tell yet' : 'needs 14+ food days and a 4-week weight trend');
+  h += '</div>';
+
+  h += fuel8Card();
+  h += foodHistory();
+  return h;
+}
+function fuel8Card(){
+  var h = '<div class="card"><div class="row top"><div><div class="label">Fuel8</div>';
+  if (!canFood()) return h + '<div class="small text-2 sm-gap">Syncs through your account in the iPhone app.</div></div></div></div>';
+  var last = lastFoodSync();
+  if (Food.key) h += '<div class="med" style="margin-top:6px">Connected</div><div class="small muted sm-gap">' + esc(last ? 'Last sync ' + whenText(last).toLowerCase() : 'Waiting for the first sync from your Shortcut') + '</div>';
+  else h += '<div class="med" style="margin-top:6px">' + (Food.keyLoaded ? 'Not connected' : 'Checking…') + '</div><div class="small muted sm-gap">Send your food from Fuel8 here automatically.</div>';
+  h += '</div>' + (Food.key ? statusChip('good', 'On') : '<span class="chip">Off</span>') + '</div>';
+  h += '<div class="btn-row md-gap" style="margin-bottom:0"><button class="btn' + (Food.key ? '' : ' primary') + '" data-act="fuel8">' + (Food.key ? 'Setup & key' : 'Connect Fuel8') + '</button>' +
+       '<button class="btn" data-act="foodcheck">Check now</button></div></div>';
+  return h;
+}
+function foodHistory(){
+  var items = state.food.filter(function(e){ return foodLogged(e) || e.protein != null; }).slice().reverse();
+  var lim = ui.showAll.food ? items.length : 14;
+  var h = '<div class="section-title">Daily food</div><div class="card list" style="padding:0">';
+  if (!items.length) h += '<div class="empty-note">Nothing from Fuel8 yet.</div>';
+  items.slice(0, lim).forEach(function(e){
+    var mac = macroBits(e, true).join(' · ');
+    h += '<div class="item"><div style="min-width:0"><div class="t1">' + esc(relDay(e.date)) + '</div>' + (mac ? '<div class="t2 ellip">' + esc(mac) + '</div>' : '') + '</div>' +
+         '<div class="r"><div class="t1">' + (e.kcal != null ? f0(e.kcal) : '—') + '</div><div class="t2">kcal</div></div></div>';
+  });
+  if (items.length > lim) h += '<button class="more" data-act="more" data-list="food">Show all ' + items.length + '</button>';
+  return h + '</div><p class="small muted" style="text-align:center;margin:10px 0 0">To change a day, edit it in Fuel8. It updates here the next time the Shortcut runs.</p>';
+}
+
+/* ---------- chart: calories per day with the target line ---------- */
+function drawFoodChart(host){
+  var t = foodTargets(), tn = tnum(), days = { '2w':14, '4w':28, '12w':84 }[foodRange()] || 28;
+  var W = Math.max(260, host.clientWidth || 320), H = 216, m = { l:44, r:8, t:18, b:26 };
+  var pw = W - m.l - m.r, ph = H - m.t - m.b, byDate = {};
+  state.food.forEach(function(e){ byDate[e.date] = e; });
+  var data = [];
+  for (var n = tn - days + 1; n <= tn; n++){ var e = byDate[dstr(n)]; data.push({ n:n, e: foodLogged(e) ? e : null, today: n === tn }); }
+  if (!data.some(function(d){ return d.e; })){ host.innerHTML = '<div class="empty">' + (state.food.length ? 'No food logged in this range.' : 'Your daily calories show up here once Fuel8 syncs.') + '</div>'; return; }
+  var ymax = t.kcal || 0;
+  data.forEach(function(d){ if (d.e) ymax = Math.max(ymax, d.e.kcal); });
+  var step = niceStep(ymax * 1.1, 4), hi = Math.ceil(ymax * 1.1 / step) * step;
+  var band = pw / data.length, bw = clamp(band * 0.64, 2, 22);
+  var X = function(i){ return m.l + band * i + band / 2; };
+  var Y = function(v){ return m.t + (hi - v) / hi * ph; };
+  var axis = function(v){ return v >= 1000 ? nf2.format(v / 1000) + 'k' : f0(v); };
+  var o = ['<svg viewBox="0 0 ' + W + ' ' + H + '" height="' + H + '" role="img" aria-label="Calories per day">'];
+  for (var v = 0; v <= hi + 1e-9; v += step){
+    var yy = Y(v).toFixed(1);
+    o.push('<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + yy + '" y2="' + yy + '" stroke="' + (v === 0 ? 'rgba(122,140,163,.4)' : 'var(--grid)') + '" stroke-width="1"/>');
+    o.push('<text x="' + (m.l - 7) + '" y="' + yy + '" text-anchor="end" dominant-baseline="middle">' + axis(v) + '</text>');
+  }
+  o.push('<rect class="hb" y="' + m.t + '" height="' + ph + '" width="' + band.toFixed(1) + '" fill="rgba(122,140,163,.12)" rx="5" style="display:none"/>');
+  data.forEach(function(d, i){
+    if (!d.e) return;
+    var x = X(i) - bw/2, y = Y(d.e.kcal), hgt = Math.max(1, Y(0) - y), r = Math.min(3, bw/2, hgt);
+    o.push('<path d="M' + x.toFixed(1) + ',' + (y + hgt).toFixed(1) + 'V' + (y + r).toFixed(1) + 'Q' + x.toFixed(1) + ',' + y.toFixed(1) + ' ' + (x + r).toFixed(1) + ',' + y.toFixed(1) +
+           'H' + (x + bw - r).toFixed(1) + 'Q' + (x + bw).toFixed(1) + ',' + y.toFixed(1) + ' ' + (x + bw).toFixed(1) + ',' + (y + r).toFixed(1) + 'V' + (y + hgt).toFixed(1) + 'Z" fill="var(--data)"' + (d.today ? ' fill-opacity=".6"' : '') + '/>');
+  });
+  if (t.kcal) o.push('<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + Y(t.kcal).toFixed(1) + '" y2="' + Y(t.kcal).toFixed(1) + '" stroke="var(--goal)" stroke-width="2" stroke-dasharray="6 5" stroke-linecap="round"/>');
+  var maxLabels = Math.max(2, Math.floor(pw / 54)), every = Math.ceil(data.length / maxLabels);
+  data.forEach(function(d, i){
+    if ((data.length - 1 - i) % every !== 0) return;
+    o.push('<text x="' + X(i).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="' + (i === data.length - 1 ? 'end' : 'middle') + '"' + (d.today ? ' style="fill:var(--text-2);font-weight:600"' : '') + '>' + (d.today ? 'Today' : fmtDn(d.n)) + '</text>');
+  });
+  o.push('<rect class="hit" x="' + m.l + '" y="0" width="' + pw + '" height="' + H + '" fill="transparent"/>');
+  o.push('</svg><div class="tip"></div>');
+  host.innerHTML = o.join('');
+
+  attachHover(host, function(px){
+    var i = clamp(Math.floor((px - m.l) / band), 0, data.length - 1), d = data[i];
+    var hb = $('.hb', host); hb.style.display = ''; hb.setAttribute('x', (m.l + band * i).toFixed(1));
+    var html = '<div class="t">' + esc(fmtDn(d.n, { dow:true })) + (d.today ? ' · so far' : '') + '</div>';
+    if (d.e){
+      html += '<div><i class="sw" style="background:var(--data)"></i><b>' + f0(d.e.kcal) + ' kcal</b></div>';
+      var mac = macroBits(d.e).join(' · '); if (mac) html += '<div class="muted">' + esc(mac) + '</div>';
+    } else html += '<div class="muted">Nothing logged</div>';
+    if (t.kcal) html += '<div><i class="ln"></i>Target ' + f0(t.kcal) + ' kcal' + (d.e ? ' <span class="muted">(' + (d.e.kcal <= t.kcal ? f0(t.kcal - d.e.kcal) + ' under' : f0(d.e.kcal - t.kcal) + ' over') + ')</span>' : '') + '</div>';
+    return { x:X(i), y:Y(Math.max(d.e ? d.e.kcal : 0, t.kcal || 0)), html:html };
+  }, function(){ $('.hb', host).style.display = 'none'; });
+}
+
+/* ---------- sheets ---------- */
+function foodTargetSheet(){
+  var t = foodTargets(), st = foodStats();
+  var tip = st.maintenance ? 'Your estimated maintenance is about ' + f0(st.maintenance) + ' kcal a day. Eating around 500 kcal below it works out at roughly half a kilo a week.' : 'Leave a box empty for no target.';
+  openSheet('Daily food targets', '<form novalidate><div class="two">' +
+    field('Calories (kcal)', '<input name="kcal" inputmode="numeric" placeholder="e.g. 2000" value="' + (t.kcal ? Math.round(t.kcal) : '') + '">') +
+    field('Protein (g)', '<input name="protein" inputmode="numeric" placeholder="e.g. 170" value="' + (t.protein ? Math.round(t.protein) : '') + '">') +
+    '</div><div class="calc">' + esc(tip) + '</div><div class="err"></div><button class="btn primary block" type="submit">Save targets</button></form>', function(sh){
+    var f = $('form', sh);
+    f.addEventListener('submit', function(ev){
+      ev.preventDefault();
+      var k = f.kcal.value.trim() ? parseIntLoose(f.kcal.value) : null, p = f.protein.value.trim() ? parseIntLoose(f.protein.value) : null;
+      if (k !== null && !(k >= 800 && k <= 6000)) return formErr(sh, 'Calories should be between 800 and 6,000.');
+      if (p !== null && !(p >= 20 && p <= 400)) return formErr(sh, 'Protein should be between 20 and 400 g.');
+      state.prefs.kcalTarget = k; state.prefs.proteinTarget = p;
+      persist(['settings']); closeSheet(); render(); toast(k || p ? 'Targets saved' : 'Targets cleared');
+    });
+  });
+}
+
+function fuel8Sheet(newKey){
+  if (!canFood()){
+    openSheet('Connect Fuel8', '<p>Food from Fuel8 syncs through your Health Hub account. Open Health Hub from your iPhone’s Home Screen, log in, then come back here.</p>');
+    return;
+  }
+  var url = foodUrl(), k = Food.key, keyBlock;
+  if (newKey){
+    keyBlock = '<div class="calc"><b>Here’s your sync key.</b> It’s shown only this once, so copy it now and paste it into the Shortcut in step 3.</div>' +
+      '<span class="url keybox" data-keyval aria-label="Sync key">' + esc(newKey) + '</span><button class="btn primary block" type="button" data-copy-key>Copy key</button>';
+  } else if (k){
+    keyBlock = '<div class="calc">You have a key ending <b>••' + esc(k.hint || '') + '</b>' + (k.created_at ? ', made ' + esc(fmtD(localDay(Date.parse(k.created_at)), { year:true })) : '') +
+      (k.last_used_at ? '. Last used ' + esc(whenText(k.last_used_at).toLowerCase()) + '.' : '. It hasn’t been used yet.') + '</div>' +
+      '<p class="small muted">Only a scrambled copy of the key is stored, so it can’t be shown again. If you need it, make a new one and paste that into the Shortcut instead (the old one stops working).</p>' +
+      '<div class="btn-row"><button class="btn" type="button" data-newkey>Make a new key</button><button class="btn danger" type="button" data-disconnect>Disconnect</button></div>';
+  } else keyBlock = '<button class="btn primary block" type="button" data-newkey>Make my sync key</button><div class="err" style="margin-top:8px"></div>';
+
+  var body = '<p>Fuel8 saves the food you confirm to Apple Health. A Shortcut on your iPhone reads today’s totals from Apple Health and sends them here every time you close Fuel8.</p>' +
+    '<div class="step-h">1 · In Fuel8</div>' +
+    '<ol class="steps"><li>Turn on <b>Apple Health</b> sharing in Fuel8’s settings.</li><li>When iPhone asks, allow Fuel8 to write <b>Dietary Energy</b> and <b>Protein</b> (and <b>Carbohydrates</b> and <b>Total Fat</b> if you want those too).</li></ol>' +
+    '<div class="step-h">2 · Your sync key</div>' + keyBlock +
+    '<div class="step-h">3 · Make the Shortcut</div>' +
+    '<p class="small">In the <b>Shortcuts</b> app, tap <b>+</b> and name it <b>Health Hub food</b>. Then add:</p>' +
+    '<ol class="steps">' +
+      '<li><b>Find Health Samples</b>. Set the type to <b>Dietary Energy</b>, then <b>Add Filter</b> → <b>Start Date</b> → <b>is today</b>.</li>' +
+      '<li><b>Calculate Statistics</b> → <b>Sum</b> of the Health Samples.</li>' +
+      '<li><b>Set Variable</b> and call it <b>kcal</b>.</li>' +
+      '<li>Repeat 1–3 with <b>Protein</b> → variable <b>protein</b>. Optional: <b>Carbohydrates</b> → <b>carbs</b>, <b>Total Fat</b> → <b>fat</b>.</li>' +
+      '<li><b>Get Contents of URL</b> with this address:<span class="url" data-url>' + esc(url) + '</span><button class="btn small" type="button" data-copy-url>Copy address</button>' +
+        '<div style="margin-top:8px">Tap the arrow to show more and set <b>Method</b> to <b>POST</b> and <b>Request Body</b> to <b>JSON</b>. Add these fields:</div>' +
+        '<ul><li><b>key</b> (Text): paste your sync key</li><li><b>date</b> (Text): the <b>Current Date</b> variable</li><li><b>kcal</b> (Number): the <b>kcal</b> variable</li><li><b>protein</b> (Number): the <b>protein</b> variable</li><li>Optional: <b>carbs</b> and <b>fat</b> the same way</li></ul></li>' +
+      '<li>Tap <b>▶</b> to run it once and allow access to Health when asked.</li>' +
+    '</ol>' +
+    '<div class="step-h">4 · Make it automatic</div>' +
+    '<ol class="steps"><li>In Shortcuts, open <b>Automation</b> → <b>+</b> → <b>App</b>.</li><li>Choose <b>Fuel8</b>, tick <b>Is Closed</b> (untick <b>Is Opened</b>) and pick <b>Run Immediately</b>.</li><li>Choose the <b>Health Hub food</b> shortcut.</li></ol>' +
+    '<p class="small muted">It runs when you close Fuel8 because iPhone only lets Shortcuts read Health data while the phone is unlocked. Log food on the day it’s eaten; the Shortcut sends today’s totals.</p>' +
+    '<div class="step-h">5 · Check it worked</div>' +
+    '<button class="btn block" type="button" data-check>Check for today’s food</button>';
+
+  openSheet('Connect Fuel8', body, function(sh){
+    function selectText(el){ try { var r = document.createRange(); r.selectNodeContents(el); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } catch(e){} }
+    function copy(text, msg, el){
+      var fail = function(){ if (el) selectText(el); toast('Press and hold the text to copy it'); };
+      try { navigator.clipboard.writeText(text).then(function(){ toast(msg); }, fail); } catch(e){ fail(); }
+    }
+    var ck = $('[data-copy-key]', sh);
+    if (ck) ck.addEventListener('click', function(){ var el = $('[data-keyval]', sh); copy(el.textContent.trim(), 'Key copied — paste it into the Shortcut', el); });
+    $('[data-copy-url]', sh).addEventListener('click', function(){ copy(url, 'Address copied', $('[data-url]', sh)); });
+    var nk = $('[data-newkey]', sh);
+    if (nk){
+      var make = async function(){
+        if (offlineNow()) return toast('You’re offline — connect and try again');
+        nk.disabled = true; nk.textContent = 'Making your key…';
+        try { var key = await makeFoodKey(); closeSheet(); setTimeout(function(){ fuel8Sheet(key); render(); }, 280); }
+        catch(e){ nk.disabled = false; nk.textContent = k ? 'Make a new key' : 'Make my sync key'; toast('Couldn’t make a key — check your connection'); }
+      };
+      if (k) confirmButton(nk, 'Tap again: the old key stops working', make); else nk.addEventListener('click', make);
+    }
+    var dc = $('[data-disconnect]', sh);
+    if (dc) confirmButton(dc, 'Tap again to disconnect', async function(){
+      try { await removeFoodKey(); closeSheet(); render(); toast('Fuel8 disconnected — food already synced stays'); }
+      catch(e){ toast('Couldn’t disconnect — check your connection'); }
+    });
+    $('[data-check]', sh).addEventListener('click', function(ev){ checkFoodNow(ev.currentTarget); });
+  });
+}
+
+/* =========================================================
    Settings, backup & restore
    ========================================================= */
 function backupJSON(){ return JSON.stringify({ app:'health-hub', version:1, exportedAt:new Date().toISOString(), data:state }, null, 1); }
 function settingsSheet(){
-  var counts = state.weights.length + ' weigh-ins · ' + state.lifts.length + ' sessions · ' + state.runs.length + ' runs · ' + state.steps.length + ' step days · ' + state.checkins.length + ' check-in' + (state.checkins.length === 1 ? '' : 's');
+  var counts = state.weights.length + ' weigh-ins · ' + state.lifts.length + ' sessions · ' + state.runs.length + ' runs · ' + state.steps.length + ' step days · ' + state.checkins.length + ' check-in' + (state.checkins.length === 1 ? '' : 's') + (state.food.length ? ' · ' + state.food.length + ' food day' + (state.food.length === 1 ? '' : 's') : '');
   var where = Store.mode === 'account' ? 'Your entries are saved to your own account, so you can log in on any phone or computer. Nobody else using the app can see them.'
             : Store.mode === 'cloud' ? 'Your entries are saved privately to your Claude account, so they’re the same on your phone and computer.'
             : Store.mode === 'local' && BUILD === 'pwa' ? 'Your entries are saved on this iPhone. Save a backup now and then — deleting the app from your Home Screen deletes its data.'
@@ -2171,6 +2544,8 @@ function settingsSheet(){
       '<button type="button" data-v="0" class="' + (state.prefs.weekStart === 0 ? 'on' : '') + '">Sunday</button>' +
       '<button type="button" data-v="6" class="' + (state.prefs.weekStart === 6 ? 'on' : '') + '">Saturday</button></div></div>' +
     field('Default rest timer', '<select name="restDefault">' + REST_OPTS.map(function(v){ return '<option value="' + v + '"' + (v === state.prefs.restDefault ? ' selected' : '') + '>' + restLabel(v) + '</option>'; }).join('') + '</select>', 'Used for exercises you haven’t set your own rest time for.') +
+    '<hr><div class="label" style="margin-bottom:10px">Food</div>' +
+    '<div class="btn-row"><button class="btn" data-food-targets>Daily targets</button>' + (acct ? '<button class="btn" data-fuel8>' + (Food.key ? 'Fuel8 sync' : 'Connect Fuel8') + '</button>' : '') + '</div>' +
     '<hr><div class="label" style="margin-bottom:10px">Hevy</div>' +
     '<button class="btn block" data-hevy>Import workouts from Hevy CSV</button>' +
     '<hr><div class="label" style="margin-bottom:10px">Backup</div>' +
@@ -2204,6 +2579,8 @@ function settingsSheet(){
       $all('[data-ws] button', sh).forEach(function(x){ x.classList.toggle('on', x === b); }); render();
     }); });
     $('[data-hevy]', sh).addEventListener('click', function(){ closeSheet(); setTimeout(hevySheet, 280); });
+    $('[data-food-targets]', sh).addEventListener('click', function(){ closeSheet(); setTimeout(foodTargetSheet, 280); });
+    var f8 = $('[data-fuel8]', sh); if (f8) f8.addEventListener('click', function(){ closeSheet(); setTimeout(function(){ fuel8Sheet(); }, 280); });
     $('select[name=restDefault]', sh).addEventListener('change', function(ev){ state.prefs.restDefault = +ev.target.value; persist(['settings']); toast('Default rest: ' + restLabel(state.prefs.restDefault)); });
     $('[data-copy]', sh).addEventListener('click', function(){
       var txt = backupJSON();
@@ -2247,6 +2624,7 @@ function settingsSheet(){
       var pics = []; state.checkins.forEach(function(c){ pics = pics.concat(ciPhotos(c)); });
       var ws = state.prefs.weekStart; state = defaultState(); state.prefs.weekStart = ws;
       removePhotos(pics);
+      if (canFood()){ try { sb.from('food_days').delete().eq('user_id', Acc.user.id).then(function(){}, function(){}); } catch(e){} }
       persist(KINDS.concat(['settings'])); closeSheet(); render(); toast('All data deleted');
     });
   });
@@ -3079,6 +3457,9 @@ document.addEventListener('click', function(ev){
   if (t.hasAttribute('data-go')) return go(t.getAttribute('data-go'));
   var act = t.getAttribute('data-act'), kind = t.getAttribute('data-kind');
   if (act === 'settings') return settingsSheet();
+  if (act === 'foodtargets') return foodTargetSheet();
+  if (act === 'fuel8') return fuel8Sheet();
+  if (act === 'foodcheck') return checkFoodNow(t);
   if (act === 'hevy') return hevySheet();
   if (act === 'startwk') return startEmptyWorkout();
   if (act === 'resumewk') return openLogger();
